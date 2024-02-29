@@ -97,7 +97,7 @@ function App() {
 
   useEffect(() => {
     getCurrentOwner();
-    getPinStates();
+    // getPinStates();
   }, [signer]);
 
   return (
