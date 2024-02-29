@@ -4,7 +4,7 @@ import "@nomicfoundation/hardhat-toolbox";
 const accounts = vars.has("PRIVATE_KEY") ? [vars.get("PRIVATE_KEY")] : [];
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.19",
+  solidity: "0.8.21",
   defaultNetwork: "localhost",
   networks: {
     localhost: {
