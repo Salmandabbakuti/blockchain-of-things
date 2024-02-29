@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useSigner, useAddress } from "@thirdweb-dev/react";
 import { Contract } from "@ethersproject/contracts";
-import { message, Typography, Switch, Card } from "antd";
+import { message, Typography, Switch, Card, Badge } from "antd";
 import "./App.css";
 
-const contractAddress = "0x2239CaF0A0d35c83dE8eF2b28879DC20F7047ef7";
+const contractAddress =
+  import.meta.env.VITE_PIN_CONTROLLER_CONTRACT_ADDRESS ||
+  "0x2239CaF0A0d35c83dE8eF2b28879DC20F7047ef7";
 
 const contractABI = [
   "event PinStatusChanged(uint8 pin, uint8 status)",
@@ -22,8 +24,7 @@ const supportedPins = [
 ];
 
 function App() {
-  const [logMessage, setLogMessage] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState({});
   const [currentOwner, setCurrentOwner] = useState("");
   const [pinStates, setPinStates] = useState({});
 
@@ -58,7 +59,7 @@ function App() {
       setLoading({ transferOwnership: true });
       const tx = await contract.connect(signer).transferOwnership(newOwner);
       await tx.wait();
-      setLogMessage(`Ownership transferred to ${newOwner}`);
+      message.success(`Ownership transferred to ${newOwner}`);
     } catch (err) {
       console.log("err transferring ownership", err);
       message.error("Failed to transfer ownership");
@@ -132,13 +133,20 @@ function App() {
           {supportedPins.map((pin, index) => (
             <div key={index}>
               <Switch
+                size="default"
                 loading={loading[pin] || false}
                 checkedChildren="On"
                 unCheckedChildren="Off"
                 checked={pinStates[pin] || false}
                 onChange={(checked) => handleSetPinStatus(pin, checked)}
               />
-              <Typography.Text strong>{pin}</Typography.Text>
+              <Badge
+                count={pin}
+                style={{
+                  backgroundColor: pinStates[pin] ? "green" : "red",
+                  marginLeft: "10px"
+                }}
+              />
             </div>
           ))}
         </Card>
