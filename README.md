@@ -97,7 +97,7 @@ npm run dev
 
 ## Demo
 
-![Screen1](https://github.com/Salmandabbakuti/depin-bnb-hack/assets/29351207/479c57e3-d279-4c97-bb90-7723611c3713)
+![Screen1](https://github.com/Salmandabbakuti/depin-bnb-hack/assets/29351207/04c8f4e7-a220-4092-9ecc-4bf9d1541d68)
 
 ## Built With
 
