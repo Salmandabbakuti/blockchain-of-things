@@ -6,7 +6,7 @@ import "./App.css";
 
 const contractAddress =
   import.meta.env.VITE_PIN_CONTROLLER_CONTRACT_ADDRESS ||
-  "0x8E06397Dc2CC0dc833904bA0dc8a03688cc6c194";
+  "0x8788074b64e2fB43f1419C7198FbCd02A1BBCc29";
 
 const contractABI = [
   "event PinStatusChanged(uint8 pin, uint8 status)",

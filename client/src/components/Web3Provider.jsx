@@ -29,7 +29,7 @@ export default function Web3Provider({ children }) {
 
   return (
     <ThirdwebProvider
-      activeChain={BinanceTestnet}
+      activeChain={Binance}
       supportedChains={[Binance, BinanceTestnet, Opbnb, OpbnbTestnet]}
       supportedWallets={supportedWallets}
       autoConnect={true}
