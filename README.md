@@ -4,6 +4,10 @@ DePIN Raspi Connect is a Raspberry Pi-based IoT project designed for home automa
 
 DePIN Raspi Connect leverages the power of Raspberry Pi's GPIO pins to control home devices while integrating blockchain technology for enhanced security and trust among connected devices. The project includes a smart contract system that stores and updates pin statuses with access control by the owner. When authorized users update pin statuses, the contract emits events with the respective pin number and status. A Python listener then detects these events and updates the Raspberry Pi pins accordingly, simulating device control in a secure and decentralized manner.
 
+### Architecture
+
+![Untitled Diagram drawio (1)](https://github.com/Salmandabbakuti/depin-bnb-hack/assets/29351207/7e1e5b3c-6a84-434b-9b17-cfbe6aaacdc4)
+
 ## Getting Started
 
 ### Prerequisites
