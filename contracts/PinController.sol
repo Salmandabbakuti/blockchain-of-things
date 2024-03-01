@@ -20,6 +20,7 @@ contract PinController {
     }
 
     event PinStatusChanged(uint8 pin, PinStatus status);
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     function setPinStatus(uint8 _pin, PinStatus _pinStatus) public onlyOwner {
         pinStatus[_pin] = _pinStatus;
@@ -28,5 +29,6 @@ contract PinController {
 
     function transferOwnership(address _newOwner) public onlyOwner {
         owner = _newOwner;
+        emit OwnershipTransferred(msg.sender, _newOwner);
     }
 }
