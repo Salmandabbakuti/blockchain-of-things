@@ -33,6 +33,8 @@ function App() {
 
   const handleSetPinStatus = async (pin, status) => {
     if (!account || !signer) return message.error("Please connect your wallet");
+    if (currentOwner?.toLowerCase() !== account.toLowerCase())
+      return message.error("Only owner can control these pins");
     try {
       setLoading({ [pin]: true });
       message.info("Sending pin status change transaction...");
@@ -103,55 +105,70 @@ function App() {
 
   return (
     <div className="App">
-      <h1>
-        Welcome to{" "}
-        <p
-          style={{
-            color: "blue",
-            display: "inline",
-            fontWeight: "bold",
-            fontSize: "1.5em"
-          }}
-        >
-          DePIN Raspi Connect
-        </p>
-      </h1>
-      <h2>
-        Decentralized Smart Home IoT platform that allows you to control
-        Raspberry PI GPIO pins using blockchain
-      </h2>
       {account ? (
         <Card
+          title="Control Panel"
           bordered
           extra={
-            <Typography.Text strong>
+            <Typography.Text
+              title="Pro Tip: Only owner can control these pins"
+              strong
+            >
               Owner:{" "}
               {currentOwner?.slice(0, 6) + "..." + currentOwner?.slice(-4)}
             </Typography.Text>
           }
         >
-          {supportedPins.map((pin, index) => (
-            <div key={index}>
-              <Switch
-                size="default"
-                loading={loading[pin] || false}
-                checkedChildren="On"
-                unCheckedChildren="Off"
-                checked={pinStates[pin] || false}
-                onChange={(checked) => handleSetPinStatus(pin, checked)}
-              />
-              <Badge
-                count={pin}
-                style={{
-                  backgroundColor: pinStates[pin] ? "green" : "red",
-                  marginLeft: "10px"
-                }}
-              />
-            </div>
-          ))}
+          <div
+            className="pin-container"
+            style={{ display: "flex", flexWrap: "wrap" }}
+          >
+            {supportedPins.map((pin, index) => (
+              <div
+                key={index}
+                className="pin-item"
+                style={{ width: "20%", marginBottom: "10px" }}
+              >
+                <Switch
+                  size="default"
+                  loading={loading[pin] || false}
+                  checkedChildren="On"
+                  unCheckedChildren="Off"
+                  checked={pinStates[pin] || false}
+                  onChange={(checked) => handleSetPinStatus(pin, checked)}
+                />
+                <Badge
+                  count={pin}
+                  style={{
+                    backgroundColor: pinStates[pin] ? "green" : "red",
+                    marginLeft: "10px"
+                  }}
+                />
+              </div>
+            ))}
+          </div>
         </Card>
       ) : (
-        <h2>Please connect your wallet to get started!</h2>
+        <div className="hero-section">
+          <h1>
+            Welcome to{" "}
+            <p
+              style={{
+                color: "blue",
+                display: "inline",
+                fontWeight: "bold",
+                fontSize: "1.5em"
+              }}
+            >
+              DePIN Raspi Connect
+            </p>
+          </h1>
+          <h2>
+            Decentralized Smart Home IoT platform that allows you to control
+            Raspberry PI GPIO pins using blockchain
+          </h2>
+          <h2>Please connect your wallet to get started!</h2>
+        </div>
       )}
     </div>
   );

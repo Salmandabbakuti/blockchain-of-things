@@ -4,3 +4,14 @@
   align-items: center;
   justify-content: center;
 }
+
+.hero-section {
+  font-family: "comic sans ms", sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 50px 30px;
+  margin: 0 auto;
+}

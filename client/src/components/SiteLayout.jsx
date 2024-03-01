@@ -19,17 +19,23 @@ export default function SiteLayout({ children }) {
           alignItems: "center"
         }}
       >
-        <h3>DePIN Raspi Connect</h3>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <ConnectWallet
-            theme={"light"} // light | dark
-            switchToActiveChain={true}
-            hideTestnetFaucet={false}
-            modalSize={"wide"} // compact | wide
-            termsOfServiceUrl="https://example.com/terms"
-            privacyPolicyUrl="https://example.com/privacy"
-          />
-        </div>
+        <h3
+          style={{
+            margin: 0,
+            padding: "0 6px",
+            fontWeight: "bold"
+          }}
+        >
+          DePIN Raspi Connect
+        </h3>
+        <ConnectWallet
+          theme={"light"} // light | dark
+          switchToActiveChain={true}
+          hideTestnetFaucet={false}
+          modalSize={"wide"} // compact | wide
+          termsOfServiceUrl="https://example.com/terms"
+          privacyPolicyUrl="https://example.com/privacy"
+        />
       </Header>
 
       <Content
@@ -52,7 +58,7 @@ export default function SiteLayout({ children }) {
         >
           ©{new Date().getFullYear()} Salman Dabbakuti. Powered by BNB Chain
         </a>
-        <p style={{ fontSize: "12px" }}>v0.0.2</p>
+        <p style={{ fontSize: "12px" }}>v0.0.3</p>
       </Footer>
     </Layout>
   );
