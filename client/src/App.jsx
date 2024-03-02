@@ -103,8 +103,7 @@ function App() {
 
   const handleTransferDeviceOwnership = async (newOwner) => {
     if (!account || !signer) return message.error("Please connect your wallet");
-    if (deviceOwner?.toLowerCase() !== account.toLowerCase())
-      return message.error("Only device owner can transfer ownership");
+    if (!newOwner) return message.error("Please enter new owner address");
     try {
       setLoading({ transferOwnership: true });
       const tx = await contract
@@ -172,7 +171,11 @@ function App() {
                 <ArrowRightOutlined
                   style={{ cursor: "pointer", color: "blue" }}
                   onClick={() => {
-                    if (deviceIdInput === "" || isNaN(deviceIdInput))
+                    if (
+                      deviceIdInput === "" ||
+                      isNaN(deviceIdInput) ||
+                      deviceIdInput < 0
+                    )
                       return message.error("Please enter a valid device ID");
                     setDeviceId(deviceIdInput);
                     setLoading({});
