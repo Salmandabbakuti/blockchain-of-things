@@ -172,7 +172,7 @@ function App() {
                 <ArrowRightOutlined
                   style={{ cursor: "pointer", color: "blue" }}
                   onClick={() => {
-                    if (!deviceIdInput)
+                    if (deviceIdInput === "" || isNaN(deviceIdInput))
                       return message.error("Please enter a valid device ID");
                     setDeviceId(deviceIdInput);
                     setLoading({});
@@ -210,26 +210,28 @@ function App() {
                   Owner:{" "}
                   {deviceOwner?.slice(0, 6) + "..." + deviceOwner?.slice(-4)}
                 </Typography.Text>
-                <Popconfirm
-                  title={
-                    <div>
-                      <label>Transfer Device Ownership</label>
-                      <Input
-                        type="text"
-                        placeholder="Enter new owner address"
-                        onChange={(e) => setNewOwner(e.target.value)}
-                      />
-                    </div>
-                  }
-                  onConfirm={() => handleTransferDeviceOwnership(newOwner)}
-                >
-                  <Button
-                    type="primary"
-                    icon={<UserSwitchOutlined />}
-                    title="Transfer Ownership"
-                    shape="circle"
-                  />
-                </Popconfirm>
+                {deviceOwner?.toLowerCase() === account.toLowerCase() && (
+                  <Popconfirm
+                    title={
+                      <div>
+                        <label>Transfer Device Ownership</label>
+                        <Input
+                          type="text"
+                          placeholder="Enter new owner address"
+                          onChange={(e) => setNewOwner(e.target.value)}
+                        />
+                      </div>
+                    }
+                    onConfirm={() => handleTransferDeviceOwnership(newOwner)}
+                  >
+                    <Button
+                      type="primary"
+                      icon={<UserSwitchOutlined />}
+                      title="Transfer Ownership"
+                      shape="circle"
+                    />
+                  </Popconfirm>
+                )}
               </Space>
             }
           >
