@@ -24,8 +24,8 @@ contract PinController {
         _;
     }
 
-    event PinStatusChanged(uint256 indexed deviceId, uint8 indexed pin, PinStatus status);
-    event OwnershipTransferred(uint256 indexed deviceId, address indexed previousOwner, address indexed newOwner);
+    event DevicePinStatusChanged(uint256 indexed deviceId, uint8 indexed pin, PinStatus status);
+    event DeviceOwnershipTransferred(uint256 indexed deviceId, address indexed previousOwner, address indexed newOwner);
     event DeviceRegistered(uint256 indexed deviceId, address indexed owner);
 
 
@@ -37,19 +37,19 @@ contract PinController {
         currentDeviceId++;
         emit DeviceRegistered(device.id, device.owner);
     }
-    function setPinStatus(uint256 _deviceId, uint8 _pin, PinStatus _pinStatus) external onlyDeviceOwner(_deviceId) {
+    function setDevicePinStatus(uint256 _deviceId, uint8 _pin, PinStatus _pinStatus) external onlyDeviceOwner(_deviceId) {
         devices[_deviceId].pinStatus[_pin] = _pinStatus;
         // pinStatus[_deviceId][_pin] = _pinStatus;
-        emit PinStatusChanged(_deviceId, _pin, _pinStatus); 
+        emit DevicePinStatusChanged(_deviceId, _pin, _pinStatus); 
     }
 
-    function transferOwnership(uint256 _deviceId, address _newOwner) external onlyDeviceOwner(_deviceId) {
+    function transferDeviceOwnership(uint256 _deviceId, address _newOwner) external onlyDeviceOwner(_deviceId) {
         address previousOwner = devices[_deviceId].owner;
         devices[_deviceId].owner = _newOwner;
-        emit OwnershipTransferred(_deviceId, previousOwner, _newOwner);
+        emit DeviceOwnershipTransferred(_deviceId, previousOwner, _newOwner);
     }
 
-    function getPinStatus(uint256 _deviceId, uint8 _pin) public view returns (PinStatus) {
+    function getDevicePinStatus(uint256 _deviceId, uint8 _pin) public view returns (PinStatus) {
         return devices[_deviceId].pinStatus[_pin];
     }
 }
