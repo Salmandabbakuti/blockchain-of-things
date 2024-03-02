@@ -1,19 +1,38 @@
 import { useEffect, useState } from "react";
 import { useSigner, useAddress } from "@thirdweb-dev/react";
 import { Contract } from "@ethersproject/contracts";
-import { message, Typography, Switch, Card, Badge } from "antd";
+import {
+  message,
+  Typography,
+  Switch,
+  Card,
+  Badge,
+  Space,
+  Button,
+  Input,
+  Popconfirm
+} from "antd";
+import {
+  PlusCircleOutlined,
+  ArrowRightOutlined,
+  UserSwitchOutlined
+} from "@ant-design/icons";
 import "./App.css";
 
 const contractAddress =
   import.meta.env.VITE_PIN_CONTROLLER_CONTRACT_ADDRESS ||
-  "0x8788074b64e2fB43f1419C7198FbCd02A1BBCc29";
+  "0xf7A218961DA9187BB43171F69581b511876b4d96";
 
 const contractABI = [
-  "event PinStatusChanged(uint8 pin, uint8 status)",
-  "function pinStatus(uint8) view returns (uint8)",
-  "function owner() view returns (address)",
-  "function setPinStatus(uint8 _pin, uint8 _pinStatus)",
-  "function transferOwnership(address _newOwner)"
+  "event DeviceRegistered(uint256 indexed deviceId, address indexed owner)",
+  "event DeviceOwnershipTransferred(address indexed previousOwner, address indexed newOwner)",
+  "event DevicePinStatusChanged(uint256 indexed _deviceId, uint8 indexed pin, uint8 status)",
+  "function currentDeviceId() view returns (uint256)",
+  "function devices(uint256) view returns (uint256 id, address owner)",
+  "function getDevicePinStatus(uint256 _deviceId, uint8 _pin) view returns (uint8)",
+  "function registerDevice() returns (uint256)",
+  "function setDevicePinStatus(uint256 _deviceId, uint8 _pin, uint8 _pinStatus)",
+  "function transferDeviceOwnership(uint256 _deviceId, address _newOwner)"
 ];
 
 const contract = new Contract(contractAddress, contractABI);
@@ -25,21 +44,48 @@ const supportedPins = [
 
 function App() {
   const [loading, setLoading] = useState({});
-  const [currentOwner, setCurrentOwner] = useState("");
+  const [deviceOwner, setDeviceOwner] = useState("");
   const [pinStates, setPinStates] = useState({});
+  const [deviceId, setDeviceId] = useState(0);
+  const [deviceIdInput, setDeviceIdInput] = useState(0);
+  const [newOwner, setNewOwner] = useState("");
 
   const account = useAddress();
   const signer = useSigner();
 
+  const handleRegisterDevice = async () => {
+    if (!account || !signer) return message.error("Please connect your wallet");
+    try {
+      setLoading({ registerDevice: true });
+      const tx = await contract.connect(signer).registerDevice();
+      message.info(
+        "Device registration transaction sent. Waiting for confirmation..."
+      );
+      const receipt = await tx.wait();
+      console.log("receipt", receipt);
+      // Access the return value from the receipt
+      const deviceId = receipt?.events[0]?.args?.deviceId;
+      console.log("deviceId", deviceId);
+      message.success(`Device registered with ID: ${deviceId.toString()}`);
+    } catch (err) {
+      console.log("err registering device", err);
+      message.error("Failed to register device");
+    } finally {
+      setLoading({ registerDevice: false });
+    }
+  };
+
   const handleSetPinStatus = async (pin, status) => {
     if (!account || !signer) return message.error("Please connect your wallet");
-    if (currentOwner?.toLowerCase() !== account.toLowerCase())
-      return message.error("Only owner can control these pins");
+    if (deviceOwner?.toLowerCase() !== account.toLowerCase())
+      return message.error("Only device owner can control these pins");
     try {
       setLoading({ [pin]: true });
       message.info("Sending pin status change transaction...");
       // +status converts boolean to number (0 or 1) since contract accepts (0 or 1) as status
-      const tx = await contract.connect(signer).setPinStatus(pin, +status);
+      const tx = await contract
+        .connect(signer)
+        .setDevicePinStatus(deviceId, pin, +status);
       message.info(
         "Pin status change transaction sent. Waiting for confirmation..."
       );
@@ -55,39 +101,45 @@ function App() {
     }
   };
 
-  const handleTransferOwnership = async (newOwner) => {
+  const handleTransferDeviceOwnership = async (newOwner) => {
     if (!account || !signer) return message.error("Please connect your wallet");
+    if (deviceOwner?.toLowerCase() !== account.toLowerCase())
+      return message.error("Only device owner can transfer ownership");
     try {
       setLoading({ transferOwnership: true });
-      const tx = await contract.connect(signer).transferOwnership(newOwner);
+      const tx = await contract
+        .connect(signer)
+        .transferDeviceOwnership(deviceId, newOwner);
       await tx.wait();
-      message.success(`Ownership transferred to ${newOwner}`);
+      message.success(`Device Ownership transferred to ${newOwner}`);
     } catch (err) {
-      console.log("err transferring ownership", err);
-      message.error("Failed to transfer ownership");
+      console.log("err transferring device ownership", err);
+      message.error("Failed to transfer device ownership");
     } finally {
       setLoading({ transferOwnership: false });
     }
   };
 
-  const getCurrentOwner = async () => {
+  const getDeviceOwner = async () => {
     if (!signer) return;
     try {
-      const owner = await contract.connect(signer).owner();
-      setCurrentOwner(owner);
+      const device = await contract.connect(signer).devices(deviceId);
+      setDeviceOwner(device?.owner);
     } catch (err) {
-      console.log("err getting current owner", err);
+      console.log("err getting current device owner", err);
     }
   };
 
-  const getPinStates = async () => {
+  const getDevicePinStates = async () => {
     if (!signer) return;
     message.info("Getting pin states from chain...");
     try {
       // should use promise all here without await
       const pinStates = {};
       for (let pin of supportedPins) {
-        const status = await contract.connect(signer).pinStatus(pin);
+        const status = await contract
+          .connect(signer)
+          .getDevicePinStatus(deviceId, pin);
         pinStates[pin] = status;
       }
       setPinStates(pinStates);
@@ -99,55 +151,118 @@ function App() {
   };
 
   useEffect(() => {
-    getCurrentOwner();
+    getDeviceOwner();
     // getPinStates();
-  }, [signer]);
+  }, [signer, deviceId]);
 
   return (
     <div className="App">
       {account ? (
-        <Card
-          title="Control Panel"
-          bordered
-          extra={
-            <Typography.Text
-              title="Pro Tip: Only owner can control these pins"
-              strong
-            >
-              Owner:{" "}
-              {currentOwner?.slice(0, 6) + "..." + currentOwner?.slice(-4)}
+        <div>
+          <Space>
+            <Typography.Text strong>
+              Set Control Panel for Device ID:{" "}
             </Typography.Text>
-          }
-        >
-          <div
-            className="pin-container"
-            style={{ display: "flex", flexWrap: "wrap" }}
-          >
-            {supportedPins.map((pin, index) => (
-              <div
-                key={index}
-                className="pin-item"
-                style={{ width: "20%", marginBottom: "10px" }}
-              >
-                <Switch
-                  size="default"
-                  loading={loading[pin] || false}
-                  checkedChildren="On"
-                  unCheckedChildren="Off"
-                  checked={pinStates[pin] || false}
-                  onChange={(checked) => handleSetPinStatus(pin, checked)}
-                />
-                <Badge
-                  count={pin}
-                  style={{
-                    backgroundColor: pinStates[pin] ? "green" : "red",
-                    marginLeft: "10px"
+            <Input
+              type="number"
+              placeholder="Enter Device ID"
+              value={deviceIdInput}
+              onChange={(e) => setDeviceIdInput(e.target.value)}
+              addonAfter={
+                <ArrowRightOutlined
+                  style={{ cursor: "pointer", color: "blue" }}
+                  onClick={() => {
+                    if (!deviceIdInput)
+                      return message.error("Please enter a valid device ID");
+                    setDeviceId(deviceIdInput);
+                    setLoading({});
+                    setPinStates({});
+                    message.info(
+                      `Control Panel is now set for Device: ${deviceIdInput}`
+                    );
                   }}
                 />
-              </div>
-            ))}
-          </div>
-        </Card>
+              }
+            />
+            <Button
+              type="primary"
+              title="Register a new device"
+              style={{
+                float: "right"
+              }}
+              onClick={handleRegisterDevice}
+              loading={loading.registerDevice || false}
+              icon={<PlusCircleOutlined />}
+            >
+              Device
+            </Button>
+          </Space>
+          <Card
+            style={{ marginTop: "20px", maxWidth: "1220px" }}
+            title={`Control Panel for Device ID: ${deviceId}`}
+            bordered
+            extra={
+              <Space>
+                <Typography.Text
+                  title="Pro Tip: Only Device owner can control these pins"
+                  strong
+                >
+                  Owner:{" "}
+                  {deviceOwner?.slice(0, 6) + "..." + deviceOwner?.slice(-4)}
+                </Typography.Text>
+                <Popconfirm
+                  title={
+                    <div>
+                      <label>Transfer Device Ownership</label>
+                      <Input
+                        type="text"
+                        placeholder="Enter new owner address"
+                        onChange={(e) => setNewOwner(e.target.value)}
+                      />
+                    </div>
+                  }
+                  onConfirm={() => handleTransferDeviceOwnership(newOwner)}
+                >
+                  <Button
+                    type="primary"
+                    icon={<UserSwitchOutlined />}
+                    title="Transfer Ownership"
+                    shape="circle"
+                  />
+                </Popconfirm>
+              </Space>
+            }
+          >
+            <div
+              className="pin-container"
+              style={{ display: "flex", flexWrap: "wrap" }}
+            >
+              {supportedPins.map((pin, index) => (
+                <div
+                  key={index}
+                  className="pin-item"
+                  style={{ width: "20%", marginBottom: "10px" }}
+                >
+                  <Switch
+                    size="default"
+                    loading={loading[pin] || false}
+                    checkedChildren="On"
+                    unCheckedChildren="Off"
+                    checked={pinStates[pin] || false}
+                    onChange={(checked) => handleSetPinStatus(pin, checked)}
+                  />
+                  <Badge
+                    count={pin}
+                    style={{
+                      backgroundColor: pinStates[pin] ? "green" : "red",
+                      marginLeft: "10px"
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
       ) : (
         <div className="hero-section">
           <h1>

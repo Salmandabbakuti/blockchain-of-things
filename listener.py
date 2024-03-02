@@ -26,21 +26,20 @@ def main():
     # abi = '[{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint8","name":"pin","type":"uint8"},{"indexed":false,"internalType":"enum PinController.PinStatus","name":"status","type":"uint8"}],"name":"PinStatusChanged","type":"event"}]'
     # Get contract address and RPC URL from environment variables
     rpc_url = os.getenv("RPC_URL", "https://bsc-dataseed.bnbchain.org")
-    contract_address = Web3.to_checksum_address(os.getenv("CONTRACT_ADDRESS", "0x8788074b64e2fB43f1419C7198FbCd02A1BBCc29"))
+    contract_address = Web3.to_checksum_address(os.getenv("CONTRACT_ADDRESS", "0xf7A218961DA9187BB43171F69581b511876b4d96"))
 
     # Initialize web3.py instance
     w3 = Web3(HTTPProvider(rpc_url))
 
-
     # Get contract instance and event filter
     contract_instance = w3.eth.contract(address=contract_address, abi=abi)
-    event_filter = contract_instance.events.PinStatusChanged.create_filter(fromBlock="latest")
+    device_id  = input("Enter the device id: ")
+    event_filter = contract_instance.events.DevicePinStatusChanged.create_filter(fromBlock="latest", argument_filters={"deviceId": int(device_id)})
 
     # Initialize GPIO pins
     setup_gpio_pins()
 
-    print("Listening for PinStatusChanged events...")
-
+    print(f"Listening for DevicePinStatusChanged events for device {device_id}")
     # Loop to listen for events
     while True:
         for event in event_filter.get_new_entries():

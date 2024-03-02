@@ -2,7 +2,7 @@
 
 DePIN Raspi Connect is a Raspberry Pi-based IoT project designed for home automation with blockchain integration. The project allows users to control home devices securely and efficiently using blockchain technology, ensuring trust, security, and authentication among IoT devices.
 
-DePIN Raspi Connect leverages the power of Raspberry Pi's GPIO pins to control home devices while integrating blockchain technology for enhanced security and trust among connected devices. The project includes a smart contract system that stores and updates pin statuses with access control by the owner. When authorized users update pin statuses, the contract emits events with the respective pin number and status. A Python listener then detects these events and updates the Raspberry Pi pins accordingly, simulating device control in a secure and decentralized manner.
+DePIN Raspi Connect leverages the power of Raspberry Pi's GPIO pins to control home devices while integrating blockchain technology for enhanced security and trust among connected devices. The project includes a smart contract system that stores and updates pin statuses with access control by the owner. When authorized users update pin statuses, the contract emits events with the respective device id, pin number and status. A Python listener then detects these events and updates the Raspberry Pi pins accordingly, simulating device control in a secure and decentralized manner.
 
 ### Architecture
 
@@ -50,23 +50,7 @@ npx hardhat vars set PRIVATE_KEY
 npx hardhat run scripts/deploy.ts --network <network>
 ```
 
-#### 2. Setup Contract Event Listener and Rasp Pi GPIO Simulator
-
-> Copy `.env.example` to `.env` and fill in the contract address from previous step and RPC URL.
-
-1. Install required dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-2. Run the event listener
-
-```bash
-python listener.py
-```
-
-#### 3. Starting Client
+#### 2. Starting Client
 
 > Copy `client/.env.example` to `client/.env` and fill in the deployed contract address and other required environment variables.
 
@@ -87,17 +71,51 @@ npm run dev
 
 3. Navigate to `http://localhost:3000` in your browser to see the client. Connect your wallet and start using the app.
 
+4. Register Device with the contract by clicking the "+ Device" button in the client interface.
+
+5. Load the control panel with registered device Id by entering device Id and click on arrow button.
+
+![usage_screen](https://github.com/Salmandabbakuti/depin-bnb-hack/assets/29351207/78e0995b-e591-4278-8c0c-f6746cf54163)
+
+#### 3. Setup Contract Event Listener and Rasp Pi GPIO Simulator
+
+> Copy `.env.example` to `.env` and fill in the contract address and RPC URL.
+
+1. Install required dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+2. Run the event listener
+
+```bash
+python listener.py
+```
+
+3. Enter the registered device Id in previous step when prompted.
+
+![listener_prompt](https://github.com/Salmandabbakuti/depin-bnb-hack/assets/29351207/d67ab995-0ceb-4c37-9a76-db3d6473bce3)
+
 ## Usage
 
-1. Connect your wallet and ensure it has owner privileges on the contract.
+1. Connect your wallet to the client interface and register a device with the contract.
 
-2. Use the client interface to turn pins on or off.
+2. Load the control panel with registered device Id by entering device Id and click on arrow icon.
 
-3. The event listener will listen for events in the contract and simulate/update the GPIO pins on the Raspberry Pi.
+3. Start the event listener in new terminal and enter the registered device Id when prompted.
+
+4. Use the client interface to turn pins on or off.
+
+5. The event listener will listen for choosen device events in the contract and simulate/update the GPIO pins on the Raspberry Pi.
+
+![usage_screen](https://github.com/Salmandabbakuti/depin-bnb-hack/assets/29351207/78e0995b-e591-4278-8c0c-f6746cf54163)
+
+![listener_prompt](https://github.com/Salmandabbakuti/depin-bnb-hack/assets/29351207/d67ab995-0ceb-4c37-9a76-db3d6473bce3)
 
 ## Demo
 
-![Screen1](https://github.com/Salmandabbakuti/depin-bnb-hack/assets/29351207/04c8f4e7-a220-4092-9ecc-4bf9d1541d68)
+![Screen1](https://github.com/Salmandabbakuti/depin-bnb-hack/assets/29351207/d0900ce0-3b03-411f-97b8-f40d7aa8b627)
 
 ## Built With
 
