@@ -9,9 +9,14 @@ import {
   Badge,
   Space,
   Button,
-  Input
+  Input,
+  Popconfirm
 } from "antd";
-import { PlusCircleOutlined, ArrowRightOutlined } from "@ant-design/icons";
+import {
+  PlusCircleOutlined,
+  ArrowRightOutlined,
+  UserSwitchOutlined
+} from "@ant-design/icons";
 import "./App.css";
 
 const contractAddress =
@@ -43,6 +48,7 @@ function App() {
   const [pinStates, setPinStates] = useState({});
   const [deviceId, setDeviceId] = useState(0);
   const [deviceIdInput, setDeviceIdInput] = useState(0);
+  const [newOwner, setNewOwner] = useState("");
 
   const account = useAddress();
   const signer = useSigner();
@@ -171,6 +177,7 @@ function App() {
             />
             <Button
               type="primary"
+              shape="circle"
               title="Load Control Panel for Device ID"
               icon={<ArrowRightOutlined />}
               onClick={() => {
@@ -189,13 +196,35 @@ function App() {
             title={`Control Panel for Device ID: ${deviceId}`}
             bordered
             extra={
-              <Typography.Text
-                title="Pro Tip: Only Device owner can control these pins"
-                strong
-              >
-                Owner:{" "}
-                {deviceOwner?.slice(0, 6) + "..." + deviceOwner?.slice(-4)}
-              </Typography.Text>
+              <Space>
+                <Typography.Text
+                  title="Pro Tip: Only Device owner can control these pins"
+                  strong
+                >
+                  Owner:{" "}
+                  {deviceOwner?.slice(0, 6) + "..." + deviceOwner?.slice(-4)}
+                </Typography.Text>
+                <Popconfirm
+                  title={
+                    <div>
+                      <label>Transfer Device Ownership</label>
+                      <Input
+                        type="text"
+                        placeholder="Enter new owner address"
+                        onChange={(e) => setNewOwner(e.target.value)}
+                      />
+                    </div>
+                  }
+                  onConfirm={() => handleTransferDeviceOwnership(newOwner)}
+                >
+                  <Button
+                    type="primary"
+                    icon={<UserSwitchOutlined />}
+                    title="Transfer Ownership"
+                    shape="circle"
+                  />
+                </Popconfirm>
+              </Space>
             }
           >
             <div
