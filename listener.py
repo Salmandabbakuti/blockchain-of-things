@@ -11,6 +11,8 @@ load_dotenv()
 # Define the GPIO pins
 pinList = [14, 15, 18, 23, 24, 25, 8, 7, 12, 16, 20, 21, 2, 3, 4, 17, 27, 22, 10, 9, 11, 5, 6, 13, 19, 26]
 
+device_id = os.getenv("DEVICE_ID", 0)
+
 def setup_gpio_pins():
     # Set up GPIO pins
     GPIO.setmode(GPIO.BCM)
@@ -25,16 +27,15 @@ def main():
 
     # abi = '[{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint8","name":"pin","type":"uint8"},{"indexed":false,"internalType":"enum PinController.PinStatus","name":"status","type":"uint8"}],"name":"PinStatusChanged","type":"event"}]'
     # Get contract address and RPC URL from environment variables
-    rpc_url = os.getenv("RPC_URL", "https://bsc-dataseed.bnbchain.org")
-    contract_address = Web3.to_checksum_address(os.getenv("CONTRACT_ADDRESS", "0x8788074b64e2fB43f1419C7198FbCd02A1BBCc29"))
+    rpc_url = os.getenv("RPC_URL", "https://bsc-testnet-dataseed.bnbchain.org")
+    contract_address = Web3.to_checksum_address(os.getenv("CONTRACT_ADDRESS", "0xc67bfB6De7137024F3c92E253d90b03c9Bbf4187"))
 
     # Initialize web3.py instance
     w3 = Web3(HTTPProvider(rpc_url))
 
-
     # Get contract instance and event filter
     contract_instance = w3.eth.contract(address=contract_address, abi=abi)
-    event_filter = contract_instance.events.PinStatusChanged.create_filter(fromBlock="latest")
+    event_filter = contract_instance.events.PinStatusChanged.create_filter(fromBlock="latest", argument_filters={"deviceId": int(device_id)})
 
     # Initialize GPIO pins
     setup_gpio_pins()
