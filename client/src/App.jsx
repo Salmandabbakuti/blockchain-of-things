@@ -160,39 +160,45 @@ function App() {
       {account ? (
         <div>
           <Space>
+            <Typography.Text strong>
+              Set Control Panel for Device ID:{" "}
+            </Typography.Text>
+            <Input
+              type="number"
+              placeholder="Enter Device ID"
+              value={deviceIdInput}
+              onChange={(e) => setDeviceIdInput(e.target.value)}
+              addonAfter={
+                <ArrowRightOutlined
+                  style={{ cursor: "pointer", color: "blue" }}
+                  onClick={() => {
+                    if (!deviceIdInput)
+                      return message.error("Please enter a valid device ID");
+                    setDeviceId(deviceIdInput);
+                    setLoading({});
+                    setPinStates({});
+                    message.info(
+                      `Control Panel is now set for Device: ${deviceIdInput}`
+                    );
+                  }}
+                />
+              }
+            />
             <Button
               type="primary"
               title="Register a new device"
+              style={{
+                float: "right"
+              }}
               onClick={handleRegisterDevice}
               loading={loading.registerDevice || false}
               icon={<PlusCircleOutlined />}
             >
               Device
             </Button>
-            <Input
-              type="number"
-              placeholder="Enter Device ID"
-              value={deviceIdInput}
-              onChange={(e) => setDeviceIdInput(e.target.value)}
-            />
-            <Button
-              type="primary"
-              shape="circle"
-              title="Load Control Panel for Device ID"
-              icon={<ArrowRightOutlined />}
-              onClick={() => {
-                if (!deviceIdInput)
-                  return message.error("Please enter a valid device ID");
-                setDeviceId(deviceIdInput);
-                setLoading({});
-                setPinStates({});
-                message.info(
-                  `Control Panel is now set for Device: ${deviceIdInput}`
-                );
-              }}
-            />
           </Space>
           <Card
+            style={{ marginTop: "20px", maxWidth: "1220px" }}
             title={`Control Panel for Device ID: ${deviceId}`}
             bordered
             extra={
