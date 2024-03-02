@@ -25,8 +25,8 @@ def main():
 
     # abi = '[{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint8","name":"pin","type":"uint8"},{"indexed":false,"internalType":"enum PinController.PinStatus","name":"status","type":"uint8"}],"name":"PinStatusChanged","type":"event"}]'
     # Get contract address and RPC URL from environment variables
-    rpc_url = os.getenv("RPC_URL", "https://bsc-testnet-dataseed.bnbchain.org")
-    contract_address = Web3.to_checksum_address(os.getenv("CONTRACT_ADDRESS", "0xd89D7fda442134cD882DC7393C9f34f94FF2938C"))
+    rpc_url = os.getenv("RPC_URL", "https://bsc-dataseed.bnbchain.org")
+    contract_address = Web3.to_checksum_address(os.getenv("CONTRACT_ADDRESS", "0xf7A218961DA9187BB43171F69581b511876b4d96"))
 
     # Initialize web3.py instance
     w3 = Web3(HTTPProvider(rpc_url))

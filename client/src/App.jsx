@@ -21,7 +21,7 @@ import "./App.css";
 
 const contractAddress =
   import.meta.env.VITE_PIN_CONTROLLER_CONTRACT_ADDRESS ||
-  "0xd89D7fda442134cD882DC7393C9f34f94FF2938C";
+  "0xf7A218961DA9187BB43171F69581b511876b4d96";
 
 const contractABI = [
   "event DeviceRegistered(uint256 indexed deviceId, address indexed owner)",
