@@ -10,7 +10,8 @@ import {
   Space,
   Button,
   Input,
-  Popconfirm
+  Popconfirm,
+  Result
 } from "antd";
 import {
   PlusCircleOutlined,
@@ -46,7 +47,7 @@ function App() {
   const [loading, setLoading] = useState({});
   const [deviceOwner, setDeviceOwner] = useState("");
   const [pinStates, setPinStates] = useState({});
-  const [deviceId, setDeviceId] = useState(0);
+  const [deviceId, setDeviceId] = useState(null);
   const [deviceIdInput, setDeviceIdInput] = useState(0);
   const [newOwner, setNewOwner] = useState("");
 
@@ -150,6 +151,7 @@ function App() {
   };
 
   useEffect(() => {
+    if (deviceId === null) return;
     getDeviceOwner();
     // getPinStates();
   }, [signer, deviceId]);
@@ -200,73 +202,87 @@ function App() {
               Device
             </Button>
           </Space>
-          <Card
-            style={{ marginTop: "20px", maxWidth: "1220px" }}
-            title={`Control Panel for Device ID: ${deviceId}`}
-            bordered
-            extra={
-              <Space>
-                <Typography.Text
-                  title="Pro Tip: Only Device owner can control these pins"
-                  strong
-                >
-                  Owner:{" "}
-                  {deviceOwner?.slice(0, 6) + "..." + deviceOwner?.slice(-4)}
-                </Typography.Text>
-                {deviceOwner?.toLowerCase() === account.toLowerCase() && (
-                  <Popconfirm
-                    title={
-                      <div>
-                        <label>Transfer Device Ownership</label>
-                        <Input
-                          type="text"
-                          placeholder="Enter new owner address"
-                          onChange={(e) => setNewOwner(e.target.value)}
-                        />
-                      </div>
-                    }
-                    onConfirm={() => handleTransferDeviceOwnership(newOwner)}
+          {deviceId != null ? (
+            <Card
+              style={{ marginTop: "20px", maxWidth: "1220px" }}
+              title={`Control Panel for Device ID: ${deviceId}`}
+              bordered
+              extra={
+                <Space>
+                  <Typography.Text
+                    title="Pro Tip: Only Device owner can control these pins"
+                    strong
                   >
-                    <Button
-                      type="primary"
-                      icon={<UserSwitchOutlined />}
-                      title="Transfer Ownership"
-                      shape="circle"
-                    />
-                  </Popconfirm>
-                )}
-              </Space>
-            }
-          >
-            <div
-              className="pin-container"
-              style={{ display: "flex", flexWrap: "wrap" }}
+                    Owner:{" "}
+                    {deviceOwner?.slice(0, 6) + "..." + deviceOwner?.slice(-4)}
+                  </Typography.Text>
+                  {deviceOwner?.toLowerCase() === account.toLowerCase() && (
+                    <Popconfirm
+                      title={
+                        <div>
+                          <label>Transfer Device Ownership</label>
+                          <Input
+                            type="text"
+                            placeholder="Enter new owner address"
+                            onChange={(e) => setNewOwner(e.target.value)}
+                          />
+                        </div>
+                      }
+                      onConfirm={() => handleTransferDeviceOwnership(newOwner)}
+                    >
+                      <Button
+                        type="primary"
+                        icon={<UserSwitchOutlined />}
+                        title="Transfer Ownership"
+                        shape="circle"
+                      />
+                    </Popconfirm>
+                  )}
+                </Space>
+              }
             >
-              {supportedPins.map((pin, index) => (
-                <div
-                  key={index}
-                  className="pin-item"
-                  style={{ width: "20%", marginBottom: "10px" }}
-                >
-                  <Switch
-                    size="default"
-                    loading={loading[pin] || false}
-                    checkedChildren="On"
-                    unCheckedChildren="Off"
-                    checked={pinStates[pin] || false}
-                    onChange={(checked) => handleSetPinStatus(pin, checked)}
-                  />
-                  <Badge
-                    count={pin}
-                    style={{
-                      backgroundColor: pinStates[pin] ? "green" : "red",
-                      marginLeft: "10px"
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-          </Card>
+              <div
+                className="pin-container"
+                style={{ display: "flex", flexWrap: "wrap" }}
+              >
+                {supportedPins.map((pin, index) => (
+                  <div
+                    key={index}
+                    className="pin-item"
+                    style={{ width: "20%", marginBottom: "10px" }}
+                  >
+                    <Switch
+                      size="default"
+                      loading={loading[pin] || false}
+                      checkedChildren="On"
+                      unCheckedChildren="Off"
+                      checked={pinStates[pin] || false}
+                      onChange={(checked) => handleSetPinStatus(pin, checked)}
+                    />
+                    <Badge
+                      count={pin}
+                      style={{
+                        backgroundColor: pinStates[pin] ? "green" : "red",
+                        marginLeft: "10px"
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </Card>
+          ) : (
+            <Result
+              status="info"
+              title="Control panel is not set for any device yet"
+              extra={
+                <h3>
+                  {" "}
+                  Please enter a valid device ID to set control panel for or
+                  register a new device and set control panel for it
+                </h3>
+              }
+            />
+          )}
         </div>
       ) : (
         <div className="hero-section">

@@ -19,19 +19,16 @@ def setup_gpio_pins():
         GPIO.setup(pin, GPIO.OUT)
 
 def main():
-    # Load contract ABI
-    with open('artifacts/contracts/PinController.sol/PinController.json', 'r') as abi_file:
-      abi = json.load(abi_file)["abi"]
-
-    # abi = '[{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint8","name":"pin","type":"uint8"},{"indexed":false,"internalType":"enum PinController.PinStatus","name":"status","type":"uint8"}],"name":"PinStatusChanged","type":"event"}]'
-    # Get contract address and RPC URL from environment variables
+    # Get RPC URL from environment variables
     rpc_url = os.getenv("RPC_URL", "https://bsc-dataseed.bnbchain.org")
-    contract_address = Web3.to_checksum_address(os.getenv("CONTRACT_ADDRESS", "0xf7A218961DA9187BB43171F69581b511876b4d96"))
-
     # Initialize web3.py instance
     w3 = Web3(HTTPProvider(rpc_url))
+    
+    # Load contract ABI and address
+    abi = '{"anonymous": false, "inputs": [{"indexed": true, "internalType": "uint256", "name": "deviceId", "type": "uint256"}, {"indexed": true, "internalType": "uint8", "name": "pin", "type": "uint8"}, {"indexed": false, "internalType": "enum PinController.PinStatus", "name": "status", "type": "uint8"}], "name": "DevicePinStatusChanged", "type": "event"}'
+    contract_address = Web3.to_checksum_address(os.getenv("CONTRACT_ADDRESS", "0xf7A218961DA9187BB43171F69581b511876b4d96"))
 
-    # Get contract instance and event filter
+    # Initialize contract instance and event filter
     contract_instance = w3.eth.contract(address=contract_address, abi=abi)
     device_id  = input("Enter the device id: ")
     event_filter = contract_instance.events.DevicePinStatusChanged.create_filter(fromBlock="latest", argument_filters={"deviceId": int(device_id)})
