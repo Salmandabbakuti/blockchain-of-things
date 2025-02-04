@@ -130,30 +130,9 @@ function App() {
     }
   };
 
-  const getDevicePinStates = async () => {
-    if (!signer) return;
-    message.info("Getting pin states from chain...");
-    try {
-      // should use promise all here without await
-      const pinStates = {};
-      for (let pin of supportedPins) {
-        const status = await contract
-          .connect(signer)
-          .getDevicePinStatus(deviceId, pin);
-        pinStates[pin] = status;
-      }
-      setPinStates(pinStates);
-      console.log("pinStates", pinStates);
-    } catch (err) {
-      message.error("Failed to get some pin states");
-      console.log("err getting pin states", err);
-    }
-  };
-
   useEffect(() => {
     if (deviceId === null) return;
     getDeviceOwner();
-    // getPinStates();
   }, [signer, deviceId]);
 
   return (
@@ -247,7 +226,7 @@ function App() {
               >
                 {supportedPins.map((pin, index) => (
                   <div
-                    key={index}
+                    key={pin}
                     className="pin-item"
                     style={{ width: "20%", marginBottom: "10px" }}
                   >
