@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
-import { useSigner, useAddress } from "@thirdweb-dev/react";
-import { Contract } from "@ethersproject/contracts";
+import { Contract, BrowserProvider, JsonRpcProvider } from "ethers";
+import {
+  useAppKitProvider,
+  useAppKitAccount,
+  useAppKitState
+} from "@reown/appkit/react";
 import {
   message,
   Typography,
@@ -20,9 +24,13 @@ import {
 } from "@ant-design/icons";
 import "./App.css";
 
-const contractAddress =
-  import.meta.env.VITE_PIN_CONTROLLER_CONTRACT_ADDRESS ||
-  "0xf7A218961DA9187BB43171F69581b511876b4d96";
+const defaultProvider = new JsonRpcProvider(
+  "https://rpc-amoy.polygon.technology",
+  80002,
+  {
+    staticNetwork: true
+  }
+);
 
 const contractABI = [
   "event DeviceRegistered(uint256 indexed deviceId, address indexed owner)",
@@ -36,7 +44,11 @@ const contractABI = [
   "function transferDeviceOwnership(uint256 _deviceId, address _newOwner)"
 ];
 
-const contract = new Contract(contractAddress, contractABI);
+const contract = new Contract(
+  "0xDcd83C8bFd6222375EC5E63d000896eAeFC2ecab",
+  contractABI,
+  defaultProvider
+);
 
 const supportedPins = [
   14, 15, 18, 23, 24, 25, 8, 7, 12, 16, 20, 21, 2, 3, 4, 17, 27, 22, 10, 9, 11,
@@ -51,13 +63,19 @@ function App() {
   const [deviceIdInput, setDeviceIdInput] = useState(0);
   const [newOwner, setNewOwner] = useState("");
 
-  const account = useAddress();
-  const signer = useSigner();
+  const { address: account } = useAppKitAccount();
+  const { selectedNetworkId } = useAppKitState();
+  const { walletProvider } = useAppKitProvider("eip155");
 
   const handleRegisterDevice = async () => {
-    if (!account || !signer) return message.error("Please connect your wallet");
+    if (!account || !walletProvider)
+      return message.error("Please connect your wallet");
+    if (selectedNetworkId !== "eip155:80002")
+      return message.error("Please switch to the Polygon Amoy network");
     try {
       setLoading({ registerDevice: true });
+      const ethersProvider = new BrowserProvider(walletProvider);
+      const signer = await ethersProvider.getSigner();
       const tx = await contract.connect(signer).registerDevice();
       message.info(
         "Device registration transaction sent. Waiting for confirmation..."
@@ -77,13 +95,18 @@ function App() {
   };
 
   const handleSetPinStatus = async (pin, status) => {
-    if (!account || !signer) return message.error("Please connect your wallet");
+    if (!account || !walletProvider)
+      return message.error("Please connect your wallet");
+    if (selectedNetworkId !== "eip155:80002")
+      return message.error("Please switch to the Polygon Amoy network");
     if (deviceOwner?.toLowerCase() !== account.toLowerCase())
       return message.error("Only device owner can control these pins");
     try {
       setLoading({ [pin]: true });
       message.info("Sending pin status change transaction...");
       // +status converts boolean to number (0 or 1) since contract accepts (0 or 1) as status
+      const ethersProvider = new BrowserProvider(walletProvider);
+      const signer = await ethersProvider.getSigner();
       const tx = await contract
         .connect(signer)
         .setDevicePinStatus(deviceId, pin, +status);
@@ -103,10 +126,15 @@ function App() {
   };
 
   const handleTransferDeviceOwnership = async (newOwner) => {
-    if (!account || !signer) return message.error("Please connect your wallet");
+    if (!account || !walletProvider)
+      return message.error("Please connect your wallet");
+    if (selectedNetworkId !== "eip155:80002")
+      return message.error("Please switch to the Polygon Amoy network");
     if (!newOwner) return message.error("Please enter new owner address");
     try {
       setLoading({ transferOwnership: true });
+      const ethersProvider = new BrowserProvider(walletProvider);
+      const signer = await ethersProvider.getSigner();
       const tx = await contract
         .connect(signer)
         .transferDeviceOwnership(deviceId, newOwner);
@@ -121,9 +149,8 @@ function App() {
   };
 
   const getDeviceOwner = async () => {
-    if (!signer) return;
     try {
-      const device = await contract.connect(signer).devices(deviceId);
+      const device = await contract.devices(deviceId);
       setDeviceOwner(device?.owner);
     } catch (err) {
       console.log("err getting current device owner", err);
@@ -133,7 +160,7 @@ function App() {
   useEffect(() => {
     if (deviceId === null) return;
     getDeviceOwner();
-  }, [signer, deviceId]);
+  }, [deviceId]);
 
   return (
     <div className="App">
@@ -275,7 +302,7 @@ function App() {
                 fontSize: "1.5em"
               }}
             >
-              DePIN Raspi Connect
+              Blockchain of Things (BoT)
             </p>
           </h1>
           <h2>

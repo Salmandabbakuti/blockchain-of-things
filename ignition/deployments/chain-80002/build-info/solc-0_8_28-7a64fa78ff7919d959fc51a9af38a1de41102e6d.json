@@ -1,0 +1,39 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_28-7a64fa78ff7919d959fc51a9af38a1de41102e6d",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "userSourceNameMap": {
+    "contracts/PinController.sol": "project/contracts/PinController.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "cancun",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/PinController.sol": {
+        "content": "// SPDX-License-Identifier: MIT\r\npragma solidity 0.8.28;\r\n\r\ncontract PinController {\r\n    uint256 public currentDeviceId = 0;\r\n\r\n    enum PinStatus {\r\n        Off,\r\n        On\r\n    }\r\n\r\n    struct Device {\r\n        uint256 id;\r\n        address owner;\r\n        mapping(uint8 => PinStatus) pinStatus;\r\n    }\r\n\r\n    mapping(uint256 => Device) public devices;\r\n    // mapping(uint256 => mapping(uint8 => PinStatus)) public pinStatus;\r\n\r\n    modifier onlyDeviceOwner(uint256 _deviceId) {\r\n        require(\r\n            devices[_deviceId].owner != address(0),\r\n            \"Device does not exist with given id\"\r\n        );\r\n        require(\r\n            devices[_deviceId].owner == msg.sender,\r\n            \"Only device owner can call this function\"\r\n        );\r\n        _;\r\n    }\r\n\r\n    event DevicePinStatusChanged(\r\n        uint256 indexed deviceId,\r\n        uint8 indexed pin,\r\n        PinStatus status\r\n    );\r\n    event DeviceOwnershipTransferred(\r\n        uint256 indexed deviceId,\r\n        address indexed previousOwner,\r\n        address indexed newOwner\r\n    );\r\n    event DeviceRegistered(uint256 indexed deviceId, address indexed owner);\r\n\r\n    function registerDevice() external returns (uint256 deviceId) {\r\n        Device storage device = devices[currentDeviceId];\r\n        device.id = currentDeviceId;\r\n        device.owner = msg.sender;\r\n        deviceId = currentDeviceId;\r\n        currentDeviceId++;\r\n        emit DeviceRegistered(device.id, device.owner);\r\n    }\r\n\r\n    function setDevicePinStatus(\r\n        uint256 _deviceId,\r\n        uint8 _pin,\r\n        PinStatus _pinStatus\r\n    ) external onlyDeviceOwner(_deviceId) {\r\n        devices[_deviceId].pinStatus[_pin] = _pinStatus;\r\n        // pinStatus[_deviceId][_pin] = _pinStatus;\r\n        emit DevicePinStatusChanged(_deviceId, _pin, _pinStatus);\r\n    }\r\n\r\n    function transferDeviceOwnership(\r\n        uint256 _deviceId,\r\n        address _newOwner\r\n    ) external onlyDeviceOwner(_deviceId) {\r\n        address previousOwner = devices[_deviceId].owner;\r\n        devices[_deviceId].owner = _newOwner;\r\n        emit DeviceOwnershipTransferred(_deviceId, previousOwner, _newOwner);\r\n    }\r\n\r\n    function getDevicePinStatus(\r\n        uint256 _deviceId,\r\n        uint8 _pin\r\n    ) public view returns (PinStatus) {\r\n        return devices[_deviceId].pinStatus[_pin];\r\n    }\r\n}\r\n"
+      }
+    }
+  }
+}

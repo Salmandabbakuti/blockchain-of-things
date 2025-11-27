@@ -1,8 +1,8 @@
-# DePIN Raspi Connect
+# Blockchain of Things( BoT )
 
-DePIN Raspi Connect is a Raspberry Pi-based IoT project designed for home automation with blockchain integration. The project allows users to control home devices securely and efficiently using blockchain technology, ensuring trust, security, and authentication among IoT devices.
+Blockchain of Things( BoT ) is a Raspberry Pi-based IoT project designed for home automation with blockchain integration. The project allows users to control home devices securely and efficiently using blockchain technology, ensuring trust, security, and authentication among IoT devices.
 
-DePIN Raspi Connect leverages the power of Raspberry Pi's GPIO pins to control home devices while integrating blockchain technology for enhanced security and trust among connected devices. The project includes a smart contract system that stores and updates pin statuses with access control by the owner. When authorized users update pin statuses, the contract emits events with the respective device id, pin number and status. A Python listener then detects these events and updates the Raspberry Pi pins accordingly, simulating device control in a secure and decentralized manner.
+Blockchain of Things( BoT ) leverages the power of Raspberry Pi's GPIO pins to control home devices while integrating blockchain technology for enhanced security and trust among connected devices. The project includes a smart contract system that stores and updates pin statuses with access control by the owner. When authorized users update pin statuses, the contract emits events with the respective device id, pin number and status. A Python listener then detects these events and updates the Raspberry Pi pins accordingly, simulating device control in a secure and decentralized manner.
 
 ### Architecture
 
@@ -12,7 +12,7 @@ DePIN Raspi Connect leverages the power of Raspberry Pi's GPIO pins to control h
 
 ### Prerequisites
 
-- [Node.js 18+](https://nodejs.org/en/download/)
+- [Node.js 22+](https://nodejs.org/en/download/)
 - [Python 3+](https://www.python.org/downloads/)
 - Windows 8+ (for simulating GPIO pins)
 - [Windows Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) - Only for Windows (Simulating GPIO pins on Windows)
@@ -41,13 +41,13 @@ npx hardhat compile
 3. Set Private Key to hardhat config variables (For deploying contract to network. Make sure you dont use your primary account)
 
 ```bash
-npx hardhat vars set PRIVATE_KEY
+npx hardhat keystore set PRIVATE_KEY
 ```
 
 3. Deploy the contract
 
 ```bash
-npx hardhat run scripts/deploy.ts --network <network>
+npx hardhat ignition deploy ignition/modules/PinController.ts --network polygonAmoy
 ```
 
 #### 2. Starting Client
