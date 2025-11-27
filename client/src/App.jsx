@@ -10,17 +10,29 @@ import {
   Typography,
   Switch,
   Card,
-  Badge,
-  Space,
   Button,
   Input,
-  Popconfirm,
-  Result
+  Row,
+  Col,
+  Empty,
+  Tag,
+  Statistic,
+  Divider,
+  Space,
+  Alert,
+  Modal,
+  Form,
+  Tooltip
 } from "antd";
 import {
   PlusCircleOutlined,
   ArrowRightOutlined,
-  UserSwitchOutlined
+  EnvironmentOutlined,
+  CheckCircleOutlined,
+  SwapOutlined,
+  AppstoreOutlined,
+  BgColorsOutlined,
+  PoweroffOutlined
 } from "@ant-design/icons";
 import "./App.css";
 
@@ -61,7 +73,8 @@ function App() {
   const [pinStates, setPinStates] = useState({});
   const [deviceId, setDeviceId] = useState(null);
   const [deviceIdInput, setDeviceIdInput] = useState(0);
-  const [newOwner, setNewOwner] = useState("");
+  const [transferModalVisible, setTransferModalVisible] = useState(false);
+  const [form] = Form.useForm();
 
   const { address: account } = useAppKitAccount();
   const { selectedNetworkId } = useAppKitState();
@@ -140,6 +153,8 @@ function App() {
         .transferDeviceOwnership(deviceId, newOwner);
       await tx.wait();
       message.success(`Device Ownership transferred to ${newOwner}`);
+      setTransferModalVisible(false);
+      form.resetFields();
     } catch (err) {
       console.log("err transferring device ownership", err);
       message.error("Failed to transfer device ownership");
@@ -160,24 +175,45 @@ function App() {
   useEffect(() => {
     if (deviceId === null) return;
     getDeviceOwner();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deviceId]);
 
   return (
     <div className="App">
       {account ? (
-        <div>
-          <Space>
-            <Typography.Text strong>
-              Set Control Panel for Device ID:{" "}
-            </Typography.Text>
-            <Input
-              type="number"
-              placeholder="Enter Device ID"
-              value={deviceIdInput}
-              onChange={(e) => setDeviceIdInput(e.target.value)}
-              addonAfter={
-                <ArrowRightOutlined
-                  style={{ cursor: "pointer", color: "blue" }}
+        <div className="dashboard-container">
+          {/* Main Control Panel - Always Visible */}
+          <Card
+            className="control-panel-card"
+            bordered={false}
+            title="GPIO Control Panel"
+            extra={
+              <Space>
+                <Input
+                  type="number"
+                  placeholder="Device ID"
+                  value={deviceIdInput}
+                  onChange={(e) => setDeviceIdInput(e.target.value)}
+                  size="middle"
+                  prefix={<EnvironmentOutlined />}
+                  style={{ width: "120px" }}
+                  onPressEnter={() => {
+                    if (
+                      deviceIdInput === "" ||
+                      isNaN(deviceIdInput) ||
+                      deviceIdInput < 0
+                    )
+                      return message.error("Please enter a valid device ID");
+                    setDeviceId(deviceIdInput);
+                    setLoading({});
+                    setPinStates({});
+                    message.success(`Connected to Device: ${deviceIdInput}`);
+                  }}
+                />
+                <Button
+                  type="primary"
+                  size="middle"
+                  icon={<ArrowRightOutlined />}
                   onClick={() => {
                     if (
                       deviceIdInput === "" ||
@@ -188,130 +224,269 @@ function App() {
                     setDeviceId(deviceIdInput);
                     setLoading({});
                     setPinStates({});
-                    message.info(
-                      `Control Panel is now set for Device: ${deviceIdInput}`
-                    );
+                    message.success(`Connected to Device: ${deviceIdInput}`);
                   }}
-                />
-              }
-            />
-            <Button
-              type="primary"
-              title="Register a new device"
-              style={{
-                float: "right"
-              }}
-              onClick={handleRegisterDevice}
-              loading={loading.registerDevice || false}
-              icon={<PlusCircleOutlined />}
-            >
-              Device
-            </Button>
-          </Space>
-          {deviceId != null ? (
-            <Card
-              style={{ marginTop: "20px", maxWidth: "1220px" }}
-              title={`Control Panel for Device ID: ${deviceId}`}
-              bordered
-              extra={
-                <Space>
-                  <Typography.Text
-                    title="Pro Tip: Only Device owner can control these pins"
-                    strong
-                  >
-                    Owner:{" "}
-                    {deviceOwner?.slice(0, 6) + "..." + deviceOwner?.slice(-4)}
-                  </Typography.Text>
-                  {deviceOwner?.toLowerCase() === account.toLowerCase() && (
-                    <Popconfirm
-                      title={
-                        <div>
-                          <label>Transfer Device Ownership</label>
-                          <Input
-                            type="text"
-                            placeholder="Enter new owner address"
-                            onChange={(e) => setNewOwner(e.target.value)}
-                          />
-                        </div>
-                      }
-                      onConfirm={() => handleTransferDeviceOwnership(newOwner)}
-                    >
-                      <Button
-                        type="primary"
-                        icon={<UserSwitchOutlined />}
-                        title="Transfer Ownership"
-                        shape="circle"
+                >
+                  Connect
+                </Button>
+                <Tooltip title="Register a new device">
+                  <Button
+                    type="default"
+                    shape="circle"
+                    size="middle"
+                    icon={<PlusCircleOutlined />}
+                    onClick={handleRegisterDevice}
+                    loading={loading.registerDevice || false}
+                    style={{ color: "#52c41a", borderColor: "#52c41a" }}
+                  />
+                </Tooltip>
+              </Space>
+            }
+          >
+            {deviceId !== null ? (
+              <>
+                {/* Device Info Section */}
+                <Divider style={{ margin: "16px 0" }} />
+                <Row gutter={[24, 24]} style={{ marginBottom: "24px" }}>
+                  <Col xs={24} sm={12} md={8}>
+                    <Statistic
+                      title="Device ID"
+                      value={deviceId}
+                      prefix={<BgColorsOutlined />}
+                    />
+                  </Col>
+                  <Col xs={24} sm={12} md={8}>
+                    <Space size="small">
+                      <Typography.Text
+                        type="secondary"
+                        strong
+                        style={{ fontSize: "0.8rem" }}
+                      >
+                        Owner
+                      </Typography.Text>
+                      <Tag color="blue" icon={<CheckCircleOutlined />}>
+                        {deviceOwner?.slice(0, 6)}...{deviceOwner?.slice(-4)}
+                      </Tag>
+
+                      {deviceOwner?.toLowerCase() === account.toLowerCase() && (
+                        <Button
+                          title="Transfer Ownership"
+                          type="default"
+                          size="small"
+                          shape="ciircle"
+                          icon={<SwapOutlined />}
+                          onClick={() => setTransferModalVisible(true)}
+                        />
+                      )}
+                    </Space>
+                  </Col>
+                </Row>
+
+                {/* Pin Status Summary */}
+                <Row gutter={[16, 16]} className="pin-summary">
+                  <Col xs={12} sm={8} md={6}>
+                    <Card size="small" className="summary-card">
+                      <Statistic
+                        title="Total Pins"
+                        value={supportedPins.length}
+                        prefix={<AppstoreOutlined />}
                       />
-                    </Popconfirm>
-                  )}
-                </Space>
-              }
-            >
-              <div
-                className="pin-container"
-                style={{ display: "flex", flexWrap: "wrap" }}
+                    </Card>
+                  </Col>
+                  <Col xs={12} sm={8} md={6}>
+                    <Card size="small" className="summary-card">
+                      <Statistic
+                        title="Active Pins"
+                        value={Object.values(pinStates).filter(Boolean).length}
+                        valueStyle={{ color: "#52c41a" }}
+                      />
+                    </Card>
+                  </Col>
+                  <Col xs={12} sm={8} md={6}>
+                    <Card size="small" className="summary-card">
+                      <Statistic
+                        title="Inactive Pins"
+                        value={
+                          Object.values(pinStates).filter((v) => !v).length
+                        }
+                        valueStyle={{ color: "#ff4d4f" }}
+                      />
+                    </Card>
+                  </Col>
+                </Row>
+
+                <Divider />
+
+                {/* Pin Grid */}
+                <Typography.Title level={4} style={{ marginBottom: "24px" }}>
+                  GPIO Pins
+                </Typography.Title>
+                <Row gutter={[8, 8]} className="pin-grid">
+                  {supportedPins.map((pin) => (
+                    <Col key={pin} xs={12} sm={8} md={6} lg={4} xl={3}>
+                      <Card
+                        className={`pin-card ${pinStates[pin] ? "active" : ""}`}
+                        bordered={false}
+                        hoverable
+                      >
+                        <Space direction="vertical" style={{ width: "100%" }}>
+                          <Space
+                            style={{
+                              width: "100%",
+                              justifyContent: "space-between"
+                            }}
+                          >
+                            <Typography.Text strong>GPIO</Typography.Text>
+                            <div className="pin-number-highlight">{pin}</div>
+                          </Space>
+
+                          <Space
+                            style={{ width: "100%", justifyContent: "center" }}
+                          >
+                            <Switch
+                              size="small"
+                              loading={loading[pin] || false}
+                              checked={pinStates[pin] || false}
+                              onChange={(checked) =>
+                                handleSetPinStatus(pin, checked)
+                              }
+                            />
+                          </Space>
+
+                          <Tag
+                            color={pinStates[pin] ? "green" : "default"}
+                            icon={pinStates[pin] ? <PoweroffOutlined /> : null}
+                            className="pin-status-tag"
+                            style={{ width: "100%", textAlign: "center" }}
+                          >
+                            {pinStates[pin] ? "ON" : "OFF"}
+                          </Tag>
+                        </Space>
+                      </Card>
+                    </Col>
+                  ))}
+                </Row>
+              </>
+            ) : (
+              <Empty
+                description="No Device Connected"
+                style={{ marginTop: "40px", marginBottom: "40px" }}
               >
-                {supportedPins.map((pin, index) => (
-                  <div
-                    key={pin}
-                    className="pin-item"
-                    style={{ width: "20%", marginBottom: "10px" }}
-                  >
-                    <Switch
-                      size="default"
-                      loading={loading[pin] || false}
-                      checkedChildren="On"
-                      unCheckedChildren="Off"
-                      checked={pinStates[pin] || false}
-                      onChange={(checked) => handleSetPinStatus(pin, checked)}
-                    />
-                    <Badge
-                      count={pin}
-                      style={{
-                        backgroundColor: pinStates[pin] ? "green" : "red",
-                        marginLeft: "10px"
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
-            </Card>
-          ) : (
-            <Result
-              status="info"
-              title="Control panel is not set for any device yet"
-              extra={
-                <h3>
-                  {" "}
-                  Please enter a valid device ID to set control panel for or
-                  register a new device and set control panel for it
-                </h3>
-              }
-            />
-          )}
+                <Typography.Paragraph type="secondary">
+                  Enter a device ID above and click &quot;Connect&quot; to get
+                  started
+                </Typography.Paragraph>
+              </Empty>
+            )}
+          </Card>
         </div>
       ) : (
         <div className="hero-section">
-          <h1>
-            Welcome to{" "}
-            <p
-              style={{
-                color: "blue",
-                display: "inline",
-                fontWeight: "bold",
-                fontSize: "1.5em"
-              }}
-            >
-              Blockchain of Things (BoT)
-            </p>
-          </h1>
-          <h2>
-            Decentralized Smart Home IoT platform that allows you to control
-            Raspberry PI GPIO pins using blockchain
-          </h2>
-          <h2>Please connect your wallet to get started!</h2>
+          <Card className="hero-card" bordered={false}>
+            <div className="hero-content">
+              <div className="hero-icon">⚙️</div>
+              <Typography.Title level={1} className="hero-title">
+                Blockchain of Things
+              </Typography.Title>
+              <Typography.Paragraph className="hero-subtitle">
+                Decentralized Smart Home IoT Platform
+              </Typography.Paragraph>
+              <Typography.Paragraph className="hero-description">
+                Control your Raspberry Pi GPIO pins securely through blockchain
+                technology. Own your IoT devices with true decentralization.
+              </Typography.Paragraph>
+
+              <Row
+                gutter={[16, 16]}
+                className="features-grid"
+                style={{ marginBottom: "40px" }}
+              >
+                <Col xs={24} sm={8}>
+                  <Card size="small" className="feature-card">
+                    <div className="feature-icon">🔐</div>
+                    <Typography.Text strong>
+                      Secure & Decentralized
+                    </Typography.Text>
+                  </Card>
+                </Col>
+                <Col xs={24} sm={8}>
+                  <Card size="small" className="feature-card">
+                    <div className="feature-icon">📡</div>
+                    <Typography.Text strong>IoT Enabled</Typography.Text>
+                  </Card>
+                </Col>
+                <Col xs={24} sm={8}>
+                  <Card size="small" className="feature-card">
+                    <div className="feature-icon">⚡</div>
+                    <Typography.Text strong>Instant Control</Typography.Text>
+                  </Card>
+                </Col>
+              </Row>
+
+              <Alert
+                message="Connect your wallet to get started"
+                type="info"
+                showIcon
+                style={{ marginBottom: "30px" }}
+              />
+
+              <div className="hero-cta">
+                <appkit-button />
+              </div>
+            </div>
+          </Card>
         </div>
       )}
+
+      {/* Transfer Ownership Modal */}
+      <Modal
+        title="Transfer Device Ownership"
+        open={transferModalVisible}
+        onCancel={() => {
+          setTransferModalVisible(false);
+          form.resetFields();
+        }}
+        footer={null}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={(values) => {
+            handleTransferDeviceOwnership(values.newOwner);
+          }}
+        >
+          <Form.Item
+            label="New Owner Address"
+            name="newOwner"
+            rules={[
+              { required: true, message: "Please enter the new owner address" },
+              {
+                pattern: /^0x[a-fA-F0-9]{40}$/,
+                message: "Please enter a valid Ethereum address"
+              }
+            ]}
+          >
+            <Input
+              placeholder="0x..."
+              size="large"
+              prefix={<EnvironmentOutlined />}
+            />
+          </Form.Item>
+
+          <Form.Item>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={loading.transferOwnership || false}
+              block
+              size="large"
+              icon={<SwapOutlined />}
+            >
+              Transfer Ownership
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }

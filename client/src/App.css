@@ -3,15 +3,385 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  padding: 0;
+  background-color: #fafafa;
 }
 
+/* ============ HERO SECTION ============ */
 .hero-section {
-  font-family: "comic sans ms", sans-serif;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 50px 30px;
+  padding: 60px 20px;
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.hero-card {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2) !important;
+  padding: 60px 40px !important;
+  max-width: 700px;
+  animation: slideUp 0.6s ease-out;
+}
+
+.hero-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.hero-icon {
+  font-size: 4rem;
+  margin-bottom: 10px;
+}
+
+.hero-title {
+  margin: 0 !important;
+  font-size: 3rem !important;
+  font-weight: 800 !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
+}
+
+.hero-subtitle {
+  font-size: 1.3rem !important;
+  font-weight: 600 !important;
+  color: #667eea !important;
+  margin: 0 !important;
+}
+
+.hero-description {
+  font-size: 1rem !important;
+  color: #666 !important;
+  margin: 10px 0 30px !important;
+  line-height: 1.6;
+}
+
+.features-grid {
+  width: 100%;
+}
+
+.feature-card {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%) !important;
+  border: 1px solid rgba(102, 126, 234, 0.2) !important;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px !important;
+  border-radius: 12px !important;
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  border-color: #667eea !important;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%) !important;
+}
+
+.feature-icon {
+  font-size: 2rem;
+}
+
+.hero-cta {
+  margin: 20px 0 0 0;
+}
+
+/* ============ DASHBOARD CONTAINER ============ */
+.dashboard-container {
+  width: 100%;
+  max-width: 1400px;
+  padding: 30px 20px;
   margin: 0 auto;
+}
+
+/* ============ CONTROL PANEL ============ */
+.control-panel-card {
+  background: white !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+.control-panel-card .ant-card-body {
+  padding: 30px !important;
+}
+
+.device-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.device-info .ant-statistic-title {
+  font-size: 0.85rem !important;
+  color: #999 !important;
+}
+
+.device-info .ant-statistic-content {
+  font-size: 2rem !important;
+  font-weight: 700 !important;
+}
+
+/* ============ PIN SUMMARY ============ */
+.pin-summary {
+  margin-bottom: 24px;
+}
+
+.summary-card {
+  background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%) !important;
+  border: 1px solid #e0e0e0 !important;
+  border-radius: 8px !important;
+}
+
+.summary-card .ant-card-body {
+  padding: 16px !important;
+}
+
+.summary-card .ant-statistic-title {
+  font-size: 0.8rem !important;
+  color: #999 !important;
+  font-weight: 500 !important;
+}
+
+.summary-card .ant-statistic-content {
+  font-size: 1.8rem !important;
+  font-weight: 700 !important;
+}
+
+/* ============ PIN GRID ============ */
+.pin-grid {
+  width: 100%;
+}
+
+.pin-card {
+  background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%) !important;
+  border: 2px solid transparent !important;
+  border-radius: 10px !important;
+  transition: all 0.3s ease !important;
+  overflow: hidden;
+  position: relative;
+}
+
+.pin-card:hover {
+  transform: translateY(-3px);
+  border-color: #667eea !important;
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.15) !important;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e0e7ff 100%) !important;
+}
+
+.pin-card.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border-color: #764ba2 !important;
+  color: white;
+}
+
+.pin-card .ant-card-body {
+  padding: 12px !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.pin-number-highlight {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #667eea;
+  margin-top: 4px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: rgba(102, 126, 234, 0.1);
+  display: inline-block;
+  min-width: 40px;
+}
+
+.pin-card.active .pin-number-highlight {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.pin-header .ant-typography-strong {
+  color: #999;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pin-status-tag {
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  font-size: 0.75rem !important;
+  width: 100%;
+  text-align: center;
+  padding: 2px 6px !important;
+}
+
+.pin-card.active .pin-status-tag {
+  background: rgba(255, 255, 255, 0.25) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+}
+
+/* ============ EMPTY STATE ============ */
+.empty-state-card {
+  background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%) !important;
+  border-radius: 12px !important;
+  border: 2px dashed #bbb !important;
+  padding: 60px 20px !important;
+  text-align: center;
+  animation: slideUp 0.5s ease-out;
+}
+
+.empty-state-card .ant-card-body {
+  padding: 40px !important;
+}
+
+.empty-state-card .ant-empty {
+  margin: 0;
+}
+
+/* ============ ANIMATIONS ============ */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============ RESPONSIVE DESIGN ============ */
+@media (max-width: 1200px) {
+  .dashboard-container {
+    padding: 24px 16px;
+  }
+
+  .hero-title {
+    font-size: 2.5rem !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 16px;
+  }
+
+  .control-panel-card .ant-card-body {
+    padding: 20px !important;
+  }
+
+  .hero-card {
+    padding: 40px 24px !important;
+  }
+
+  .hero-title {
+    font-size: 2rem !important;
+  }
+
+  .hero-subtitle {
+    font-size: 1.1rem !important;
+  }
+
+  .hero-icon {
+    font-size: 3rem;
+  }
+
+  .pin-card .ant-card-body {
+    padding: 10px !important;
+  }
+
+  .pin-header .ant-heading {
+    font-size: 1.2rem !important;
+  }
+
+  .summary-card .ant-card-body {
+    padding: 12px !important;
+  }
+
+  .feature-card {
+    padding: 16px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-container {
+    padding: 12px;
+  }
+
+  .hero-section {
+    padding: 40px 16px;
+    min-height: auto;
+  }
+
+  .hero-card {
+    padding: 30px 20px !important;
+    border-radius: 12px !important;
+  }
+
+  .hero-title {
+    font-size: 1.7rem !important;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem !important;
+  }
+
+  .hero-description {
+    font-size: 0.95rem !important;
+  }
+
+  .hero-icon {
+    font-size: 2.5rem;
+  }
+
+  .pin-card .ant-card-body {
+    padding: 10px !important;
+  }
+
+  .pin-header .ant-heading {
+    font-size: 1.1rem !important;
+  }
+
+  .pin-status-tag {
+    font-size: 0.7rem !important;
+  }
+
+  .summary-card .ant-statistic-content {
+    font-size: 1.5rem !important;
+  }
+
+  .device-info .ant-statistic-content {
+    font-size: 1.5rem !important;
+  }
+
+  .control-panel-card .ant-card-body {
+    padding: 16px !important;
+  }
 }
