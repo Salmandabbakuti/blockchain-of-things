@@ -19,10 +19,10 @@ def setup_gpio_pins():
 
 def load_contract():
     """Load contract ABI and address, and return the contract instance."""
-    rpc_url = os.getenv("RPC_URL", "https://bsc-dataseed.bnbchain.org")
-    contract_address = Web3.to_checksum_address(os.getenv("CONTRACT_ADDRESS", "0xf7A218961DA9187BB43171F69581b511876b4d96"))
+    rpc_url = os.getenv("RPC_URL", "https://rpc-amoy.polygon.technology")
+    contract_address = Web3.to_checksum_address(os.getenv("CONTRACT_ADDRESS", "0xDcd83C8bFd6222375EC5E63d000896eAeFC2ecab"))
     
-    abi = '{"anonymous": false, "inputs": [{"indexed": true, "internalType": "uint256", "name": "deviceId", "type": "uint256"}, {"indexed": true, "internalType": "uint8", "name": "pin", "type": "uint8"}, {"indexed": false, "internalType": "enum PinController.PinStatus", "name": "status", "type": "uint8"}], "name": "DevicePinStatusChanged", "type": "event"}'
+    abi = '[{"anonymous": false, "inputs": [{"indexed": true, "internalType": "uint256", "name": "deviceId", "type": "uint256"}, {"indexed": true, "internalType": "uint8", "name": "pin", "type": "uint8"}, {"indexed": false, "internalType": "enum PinController.PinStatus", "name": "status", "type": "uint8"}], "name": "DevicePinStatusChanged", "type": "event"}]'
     
     w3 = Web3(HTTPProvider(rpc_url))
     return w3.eth.contract(address=contract_address, abi=abi)

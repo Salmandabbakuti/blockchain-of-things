@@ -1,5 +1,4 @@
 import { Divider, Layout } from "antd";
-import { ConnectWallet } from "@thirdweb-dev/react";
 import "antd/dist/reset.css";
 
 const { Header, Footer, Content } = Layout;
@@ -26,16 +25,9 @@ export default function SiteLayout({ children }) {
             fontWeight: "bold"
           }}
         >
-          DePIN Raspi Connect
+          Blockchain of Things (BoT)
         </h3>
-        <ConnectWallet
-          theme={"light"} // light | dark
-          switchToActiveChain={true}
-          hideTestnetFaucet={false}
-          modalSize={"wide"} // compact | wide
-          termsOfServiceUrl="https://example.com/terms"
-          privacyPolicyUrl="https://example.com/privacy"
-        />
+        <appkit-button />
       </Header>
 
       <Content
@@ -56,9 +48,9 @@ export default function SiteLayout({ children }) {
           target="_blank"
           rel="noopener noreferrer"
         >
-          ©{new Date().getFullYear()} Salman Dabbakuti. Powered by BNB Chain
+          ©{new Date().getFullYear()} Blockchain of Things. Powered by Polygon
         </a>
-        <p style={{ fontSize: "12px" }}>v0.0.3</p>
+        <p style={{ fontSize: "12px" }}>v0.0.5</p>
       </Footer>
     </Layout>
   );

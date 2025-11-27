@@ -1,50 +1,36 @@
-import { HardhatUserConfig, vars } from "hardhat/config";
-import "@nomicfoundation/hardhat-toolbox";
+import hardhatToolboxViemPlugin from "@nomicfoundation/hardhat-toolbox-viem";
+import { configVariable, defineConfig } from "hardhat/config";
 
-const accounts = vars.has("PRIVATE_KEY") ? [vars.get("PRIVATE_KEY")] : [];
-
-const config: HardhatUserConfig = {
-  solidity: "0.8.21",
-  defaultNetwork: "localhost",
+export default defineConfig({
+  plugins: [hardhatToolboxViemPlugin],
+  solidity: {
+    profiles: {
+      default: {
+        version: "0.8.28"
+      },
+      production: {
+        version: "0.8.28",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200
+          }
+        }
+      }
+    }
+  },
   networks: {
-    localhost: {
-      url: "http://127.0.0.1:8545"
+    polygonAmoy: {
+      type: "http",
+      chainType: "l1",
+      url: "https://rpc-amoy.polygon.technology/",
+      accounts: [configVariable("PRIVATE_KEY")]
     },
-    bscTestnet: {
-      url: "https://bsc-testnet-dataseed.bnbchain.org",
-      chainId: 97,
-      accounts
-    },
-    bscMainnet: {
-      url: "https://bsc-dataseed.bnbchain.org",
-      chainId: 56,
-      accounts
-    },
-    greenFieldTestnet: {
-      url: "https://gnfd-testnet-fullnode-tendermint-us.bnbchain.org",
-      chainId: 5600,
-      accounts
-    },
-    greenFieldMainnet: {
-      url: "https://greenfield-chain-ap.bnbchain.org",
-      chainId: 1017,
-      accounts
-    },
-    opBNBTestnet: {
-      url: "https://opbnb-testnet-rpc.bnbchain.org",
-      chainId: 5611,
-      accounts
-    },
-    opBNBMainnet: {
-      url: "https://opbnb-mainnet-rpc.bnbchain.org",
-      chainId: 204,
-      accounts
-    },
-    mumbai: {
-      url: "https://rpc-mumbai.maticvigil.com",
-      accounts
+    polygon: {
+      type: "http",
+      chainType: "l1",
+      url: "https://polygon-rpc.com/",
+      accounts: [configVariable("PRIVATE_KEY")]
     }
   }
-};
-
-export default config;
+});

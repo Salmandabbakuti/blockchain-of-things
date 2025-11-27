@@ -26,6 +26,7 @@ dist-ssr
 .DS_Store
 
 #Hardhat files
+types/
 cache
 artifacts/
 coverage/

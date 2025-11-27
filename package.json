@@ -3,16 +3,22 @@
   "version": "1.0.1",
   "description": "Minimal hardhat boilerplate for Dapp development",
   "private": true,
+  "keywords": [],
+  "author": "Salman Dabbakuti",
+  "license": "ISC",
+  "type": "module",
   "scripts": {
     "test": "npx hardhat test",
     "compile": "npx hardhat compile",
     "deploy": "npx hardhat deploy"
   },
-  "keywords": [],
-  "author": "Salman Dabbakuti",
-  "license": "ISC",
   "devDependencies": {
-    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
-    "hardhat": "^2.20.1"
+    "@nomicfoundation/hardhat-ignition": "^3.0.5",
+    "@nomicfoundation/hardhat-toolbox-viem": "^5.0.1",
+    "@types/node": "^22.19.1",
+    "forge-std": "github:foundry-rs/forge-std#v1.9.4",
+    "hardhat": "^3.0.15",
+    "typescript": "~5.8.0",
+    "viem": "^2.40.3"
   }
 }
