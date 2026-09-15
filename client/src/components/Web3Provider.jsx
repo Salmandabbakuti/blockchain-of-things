@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { createAppKit } from "@reown/appkit/react";
 import { EthersAdapter } from "@reown/appkit-adapter-ethers";
-import { sepolia, polygon } from "@reown/appkit/networks";
+import { sepolia } from "@reown/appkit/networks";
 
 // 1. Get projectId
 const projectId = import.meta.env.VITE_REOWN_PROJECT_ID;
 
 // 2. Set the networks
-const networks = [sepolia, polygon];
+const networks = [sepolia];
 
 // 3. Create a metadata object - optional
 const metadata = {
