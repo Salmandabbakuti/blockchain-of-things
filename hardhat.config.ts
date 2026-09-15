@@ -25,7 +25,7 @@ export default defineConfig({
     sepolia: {
       type: "http",
       chainType: "l1",
-      url: "https://sepolia.drpc.org",
+      url: "https://ethereum-sepolia-rpc.publicnode.com",
       accounts
     },
     polygon: {

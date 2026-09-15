@@ -1,9 +1,9 @@
 import { Contract, JsonRpcProvider } from "ethers";
 
-const CONTRACT_ADDRESS = "0x0564d5e0277965666d3dfEEf2263AF6748f75327";
+const CONTRACT_ADDRESS = "0x0db6d7f70754f0acd4ab664f4e3ace9f6c5f08c9";
 
 const defaultProvider = new JsonRpcProvider(
-  "https://sepolia.drpc.org",
+  "https://ethereum-sepolia-rpc.publicnode.com",
   11155111,
   {
     staticNetwork: true

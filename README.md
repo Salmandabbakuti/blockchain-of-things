@@ -47,7 +47,7 @@ npx hardhat keystore set PRIVATE_KEY
 3. Deploy the contract
 
 ```bash
-npx hardhat ignition deploy ignition/modules/DeviceRegistry.ts --network polygonAmoy
+npx hardhat ignition deploy ignition/modules/DeviceRegistry.ts --network sepolia
 ```
 
 #### 2. Starting Client
