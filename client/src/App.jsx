@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Contract, BrowserProvider, JsonRpcProvider } from "ethers";
+import { useMemo, useState } from "react";
+import { BrowserProvider } from "ethers";
 import { useAppKitProvider, useAppKitAccount } from "@reown/appkit/react";
 import {
   message,
@@ -10,58 +10,119 @@ import {
   Input,
   Row,
   Col,
+  Descriptions,
   Empty,
-  Tag,
+  Flex,
+  Badge,
   Statistic,
-  Divider,
   Space,
-  Alert
+  Tag
 } from "antd";
-import {
-  ArrowRightOutlined,
-  EnvironmentOutlined,
-  CheckCircleOutlined,
-  AppstoreOutlined,
-  BgColorsOutlined,
-  PoweroffOutlined
-} from "@ant-design/icons";
+import { ArrowRightOutlined, PoweroffOutlined } from "@ant-design/icons";
+import { supportedPins, contract } from "./utils";
 import "./App.css";
-
-const defaultProvider = new JsonRpcProvider(
-  "https://sepolia.drpc.org",
-  11155111,
-  {
-    staticNetwork: true
-  }
-);
-
-const contractABI = [
-  "event DevicePinStatusChanged(uint256 indexed _deviceId, uint8 indexed pin, uint8 status)",
-  "function getDevicePinStatus(uint256 _deviceId, uint8 _pin) view returns (uint8)",
-  "function setDevicePinStatus(uint256 _deviceId, uint8 _pin, uint8 _pinStatus)",
-  "function getFullDeviceBitmap(uint256 _deviceId) view returns (uint256)"
-];
-
-const contract = new Contract(
-  "0x0564d5e0277965666d3dfEEf2263AF6748f75327",
-  contractABI,
-  defaultProvider
-);
-
-const supportedPins = [
-  14, 15, 18, 23, 24, 25, 8, 7, 12, 16, 20, 21, 2, 3, 4, 17, 27, 22, 10, 9, 11,
-  5, 6, 13, 19, 26
-];
 
 function App() {
   const [loading, setLoading] = useState({});
   const [pinStates, setPinStates] = useState({});
   const [deviceId, setDeviceId] = useState(null);
-  const [deviceIdInput, setDeviceIdInput] = useState(0);
+  const [deviceIdInput, setDeviceIdInput] = useState("");
 
   const { address: account, caipAddress } = useAppKitAccount();
   const selectedChainId = caipAddress?.split(":")?.[1];
   const { walletProvider } = useAppKitProvider("eip155");
+
+  const activePins = useMemo(
+    () => supportedPins.filter((pin) => pinStates[pin]).length,
+    [pinStates]
+  );
+
+  const deviceDetailItems = [
+    {
+      key: "id",
+      label: "Device ID",
+      children: <Typography.Text strong>#{deviceId}</Typography.Text>
+    },
+    {
+      key: "owner",
+      label: "Owner",
+      children: (
+        <Typography.Text code>
+          {account?.slice(0, 6)}...{account?.slice(-6)}
+        </Typography.Text>
+      )
+    },
+    {
+      key: "network",
+      label: "Network",
+      children: <Tag color="blue">Sepolia</Tag>
+    }
+  ];
+
+  const pinActivityItems = [
+    {
+      key: "all",
+      children: (
+        <Statistic
+          title="All"
+          value={supportedPins.length}
+          styles={{ content: { color: "#1677ff", fontWeight: 700 } }}
+        />
+      )
+    },
+    {
+      key: "active",
+      children: (
+        <Statistic
+          title="Active"
+          value={activePins}
+          styles={{ content: { color: "#52c41a", fontWeight: 700 } }}
+        />
+      )
+    },
+    {
+      key: "off",
+      children: (
+        <Statistic
+          title="Inactive"
+          value={supportedPins.length - activePins}
+          styles={{ content: { color: "red", fontWeight: 700 } }}
+        />
+      )
+    }
+  ];
+
+  const loadDevice = async () => {
+    if (deviceIdInput === "" || isNaN(deviceIdInput) || deviceIdInput < 0) {
+      return message.error("Enter a valid device ID");
+    }
+    if (!walletProvider) return message.error("Please connect your wallet");
+    if (selectedChainId !== "11155111") {
+      return message.error("Please switch to the Sepolia network");
+    }
+
+    try {
+      setLoading({ device: true });
+      const provider = new BrowserProvider(walletProvider);
+      const signer = await provider.getSigner();
+      const bitmap = await contract
+        .connect(signer)
+        .getFullDeviceBitmap(deviceIdInput);
+      const nextPinStates = Object.fromEntries(
+        supportedPins.map((pin) => [pin, Boolean((bitmap >> BigInt(pin)) & 1n)])
+      );
+      setDeviceId(deviceIdInput);
+      setPinStates(nextPinStates);
+      message.success(`Device ${deviceIdInput} loaded`);
+    } catch (err) {
+      console.log("err loading device", err);
+      message.error(
+        "Could not load this device. Check the network and device ID."
+      );
+    } finally {
+      setLoading({});
+    }
+  };
 
   const handleSetPinStatus = async (pin, status) => {
     if (!account || !walletProvider)
@@ -96,162 +157,157 @@ function App() {
     <div className="App">
       {account ? (
         <div className="dashboard-container">
-          {/* Main Control Panel - Always Visible */}
-          <Card
-            className="control-panel-card"
-            bordered={false}
-            title="GPIO Control Panel"
-            extra={
-              <Space>
-                <Input
-                  type="number"
-                  placeholder="Device ID"
-                  value={deviceIdInput}
-                  onChange={(e) => setDeviceIdInput(e.target.value)}
-                  size="middle"
-                  prefix={<EnvironmentOutlined />}
-                  style={{ width: "120px" }}
-                  onPressEnter={() => {
-                    if (
-                      deviceIdInput === "" ||
-                      isNaN(deviceIdInput) ||
-                      deviceIdInput < 0
-                    )
-                      return message.error("Please enter a valid device ID");
-                    setDeviceId(deviceIdInput);
-                    setLoading({});
-                    setPinStates({});
-                    message.success(`Connected to Device: ${deviceIdInput}`);
-                  }}
-                />
-                <Button
-                  type="primary"
-                  size="middle"
-                  icon={<ArrowRightOutlined />}
-                  onClick={() => {
-                    if (
-                      deviceIdInput === "" ||
-                      isNaN(deviceIdInput) ||
-                      deviceIdInput < 0
-                    )
-                      return message.error("Please enter a valid device ID");
-                    setDeviceId(deviceIdInput);
-                    setLoading({});
-                    setPinStates({});
-                    message.success(`Connected to Device: ${deviceIdInput}`);
-                  }}
-                >
-                  Connect
-                </Button>
-              </Space>
-            }
-          >
+          <Card>
+            <section className="console-header" aria-labelledby="console-title">
+              <div>
+                <span className="eyebrow">DEVICE CONSOLE</span>
+                <h2 id="console-title">GPIO control, recorded on-chain.</h2>
+                <p>
+                  Load a device to read and update the pin map associated with
+                  your connected wallet.
+                </p>
+              </div>
+              <div className="device-loader">
+                <label htmlFor="device-id">Device ID</label>
+                <Space.Compact>
+                  <Input
+                    id="device-id"
+                    inputMode="numeric"
+                    type="number"
+                    min="0"
+                    placeholder="e.g. 7"
+                    value={deviceIdInput}
+                    onChange={(e) => setDeviceIdInput(e.target.value)}
+                    onPressEnter={loadDevice}
+                  />
+                  <Button
+                    type="primary"
+                    icon={<ArrowRightOutlined />}
+                    loading={loading.device}
+                    onClick={loadDevice}
+                  />
+                </Space.Compact>
+              </div>
+            </section>
             {deviceId !== null ? (
               <>
-                {/* Device Info Section */}
-                <Row gutter={[24, 24]} style={{ marginBottom: "24px" }}>
-                  <Col xs={24} sm={12} md={8}>
-                    <Statistic
-                      title="Device ID"
-                      value={deviceId}
-                      prefix={<BgColorsOutlined />}
-                    />
-                  </Col>
-                  <Col xs={24} sm={12} md={8}>
-                    <Space size="small">
-                      <Typography.Text
-                        type="secondary"
-                        strong
-                        style={{ fontSize: "0.8rem" }}
+                <section
+                  className="overview-cards"
+                  aria-label="Device overview"
+                >
+                  <Row gutter={[16, 16]}>
+                    <Col xs={24} md={12}>
+                      <Card
+                        size="small"
+                        title="Device Info"
+                        variant="borderless"
+                        style={{ height: "100%" }}
                       >
-                        Owner
-                      </Typography.Text>
-                      <Tag color="blue" icon={<CheckCircleOutlined />}>
-                        {account?.slice(0, 6)}...{account?.slice(-4)}
-                      </Tag>
-                    </Space>
-                  </Col>
-                </Row>
-
-                {/* Pin Status Summary */}
-                <Row gutter={[16, 16]} className="pin-summary">
-                  <Col xs={12} sm={8} md={6}>
-                    <Card size="small" className="summary-card">
-                      <Statistic
-                        title="Total Pins"
-                        value={supportedPins.length}
-                        prefix={<AppstoreOutlined />}
-                      />
-                    </Card>
-                  </Col>
-                  <Col xs={12} sm={8} md={6}>
-                    <Card size="small" className="summary-card">
-                      <Statistic
-                        title="Active Pins"
-                        value={Object.values(pinStates).filter(Boolean).length}
-                        valueStyle={{ color: "#52c41a" }}
-                      />
-                    </Card>
-                  </Col>
-                  <Col xs={12} sm={8} md={6}>
-                    <Card size="small" className="summary-card">
-                      <Statistic
-                        title="Inactive Pins"
-                        value={
-                          Object.values(pinStates).filter((v) => !v).length
-                        }
-                        valueStyle={{ color: "#ff4d4f" }}
-                      />
-                    </Card>
-                  </Col>
-                </Row>
-
-                <Divider />
-
-                {/* Pin Grid */}
-                <Typography.Title level={4} style={{ marginBottom: "24px" }}>
-                  GPIO Pins
-                </Typography.Title>
-                <Row gutter={[8, 8]} className="pin-grid">
+                        <Descriptions
+                          colon={false}
+                          column={{ xs: 2, sm: 2, md: 3 }}
+                          items={deviceDetailItems}
+                          layout="vertical"
+                          size="small"
+                        />
+                      </Card>
+                    </Col>
+                    <Col xs={24} md={12}>
+                      <Card
+                        size="small"
+                        title="Pin Activity"
+                        variant="borderless"
+                        style={{ height: "100%" }}
+                      >
+                        <Descriptions
+                          colon={false}
+                          column={{ xs: 2, sm: 3 }}
+                          items={pinActivityItems}
+                          layout="vertical"
+                          size="small"
+                        />
+                      </Card>
+                    </Col>
+                  </Row>
+                </section>
+                <div className="pins-heading">
+                  <h3>Pin controls</h3>
+                  <p>
+                    Each change sends a transaction, then your listener can
+                    update the Raspberry Pi.
+                  </p>
+                </div>
+                <Row gutter={[8, 8]}>
                   {supportedPins.map((pin) => (
                     <Col key={pin} xs={12} sm={8} md={6} lg={4} xl={3}>
                       <Card
-                        className={`pin-card ${pinStates[pin] ? "active" : ""}`}
-                        bordered={false}
+                        title="GPIO"
+                        extra={
+                          <Typography.Text
+                            strong
+                            type={
+                              loading[pin]
+                                ? "warning"
+                                : pinStates[pin]
+                                  ? "success"
+                                  : undefined
+                            }
+                          >
+                            {pin}
+                          </Typography.Text>
+                        }
                         hoverable
+                        size="small"
+                        styles={{
+                          root: {
+                            borderColor: loading[pin]
+                              ? "#faad14"
+                              : pinStates[pin]
+                                ? "#52c41a"
+                                : "#d9d9d9",
+                            background: loading[pin]
+                              ? "#fffbe6"
+                              : pinStates[pin]
+                                ? "#f6ffed"
+                                : undefined
+                          },
+                          body: { padding: 14 }
+                        }}
                       >
-                        <Space direction="vertical" style={{ width: "100%" }}>
-                          <Space
-                            style={{
-                              width: "100%",
-                              justifyContent: "space-between"
-                            }}
-                          >
-                            <Typography.Text strong>GPIO</Typography.Text>
-                            <div className="pin-number-highlight">{pin}</div>
-                          </Space>
+                        <Space
+                          orientation="vertical"
+                          align="center"
+                          style={{
+                            width: "100%"
+                          }}
+                        >
+                          <Switch
+                            size="small"
+                            loading={Boolean(loading[pin])}
+                            checked={Boolean(pinStates[pin])}
+                            onChange={(checked) =>
+                              handleSetPinStatus(pin, checked)
+                            }
+                          />
 
-                          <Space
-                            style={{ width: "100%", justifyContent: "center" }}
-                          >
-                            <Switch
-                              size="small"
-                              loading={loading[pin] || false}
-                              checked={pinStates[pin] || false}
-                              onChange={(checked) =>
-                                handleSetPinStatus(pin, checked)
+                          {loading[pin] ? (
+                            <Badge
+                              status="processing"
+                              text={
+                                <Typography.Text strong type="warning">
+                                  Updating…
+                                </Typography.Text>
                               }
                             />
-                          </Space>
-
-                          <Tag
-                            color={pinStates[pin] ? "green" : "default"}
-                            icon={pinStates[pin] ? <PoweroffOutlined /> : null}
-                            className="pin-status-tag"
-                            style={{ width: "100%", textAlign: "center" }}
-                          >
-                            {pinStates[pin] ? "ON" : "OFF"}
-                          </Tag>
+                          ) : (
+                            <Typography.Text
+                              strong
+                              type={pinStates[pin] ? "success" : "secondary"}
+                            >
+                              {pinStates[pin] ? <PoweroffOutlined /> : null}{" "}
+                              {pinStates[pin] ? "On" : "Off"}
+                            </Typography.Text>
+                          )}
                         </Space>
                       </Card>
                     </Col>
@@ -259,13 +315,9 @@ function App() {
                 </Row>
               </>
             ) : (
-              <Empty
-                description="No Device Connected"
-                style={{ marginTop: "40px", marginBottom: "40px" }}
-              >
+              <Empty description="Open a device to see its GPIO controls">
                 <Typography.Paragraph type="secondary">
-                  Enter a device ID above and click &quot;Connect&quot; to get
-                  started
+                  Use the device ID configured in your Raspberry Pi listener.
                 </Typography.Paragraph>
               </Empty>
             )}
@@ -273,59 +325,26 @@ function App() {
         </div>
       ) : (
         <div className="hero-section">
-          <Card className="hero-card" bordered={false}>
-            <div className="hero-content">
-              <div className="hero-icon">⚙️</div>
-              <Typography.Title level={1} className="hero-title">
-                Blockchain of Things
-              </Typography.Title>
-              <Typography.Paragraph className="hero-subtitle">
-                Decentralized Smart Home IoT Platform
-              </Typography.Paragraph>
-              <Typography.Paragraph className="hero-description">
-                Control your Raspberry Pi GPIO pins securely through blockchain
-                technology. Own your IoT devices with true decentralization.
-              </Typography.Paragraph>
-
-              <Row
-                gutter={[16, 16]}
-                className="features-grid"
-                style={{ marginBottom: "40px" }}
-              >
-                <Col xs={24} sm={8}>
-                  <Card size="small" className="feature-card">
-                    <div className="feature-icon">🔐</div>
-                    <Typography.Text strong>
-                      Secure & Decentralized
-                    </Typography.Text>
-                  </Card>
-                </Col>
-                <Col xs={24} sm={8}>
-                  <Card size="small" className="feature-card">
-                    <div className="feature-icon">📡</div>
-                    <Typography.Text strong>IoT Enabled</Typography.Text>
-                  </Card>
-                </Col>
-                <Col xs={24} sm={8}>
-                  <Card size="small" className="feature-card">
-                    <div className="feature-icon">⚡</div>
-                    <Typography.Text strong>Instant Control</Typography.Text>
-                  </Card>
-                </Col>
-              </Row>
-
-              <Alert
-                message="Connect your wallet to get started"
-                type="info"
-                showIcon
-                style={{ marginBottom: "30px" }}
-              />
-
-              <div className="hero-cta">
-                <appkit-button />
-              </div>
+          <div className="hero-content">
+            <span className="eyebrow">BLOCKCHAIN OF THINGS</span>
+            <h1 className="hero-title">
+              A secure control path to your Raspberry Pi.
+            </h1>
+            <p className="hero-description">
+              Change GPIO pin states through a smart contract. A local listener
+              receives the event and updates the device.
+            </p>
+            <div className="hero-cta">
+              <appkit-button />
             </div>
-          </Card>
+            <div className="workflow" aria-label="How it works">
+              <span>Connect wallet</span>
+              <ArrowRightOutlined />
+              <span>Load device</span>
+              <ArrowRightOutlined />
+              <span>Control GPIO</span>
+            </div>
+          </div>
         </div>
       )}
     </div>

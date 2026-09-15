@@ -72,7 +72,7 @@ export default function SiteLayout({ children }) {
             onMouseEnter={(e) => (e.target.style.color = "#764ba2")}
             onMouseLeave={(e) => (e.target.style.color = "#667eea")}
           >
-            ©{new Date().getFullYear()} Blockchain of Things. Powered by Polygon
+            ©{new Date().getFullYear()} Blockchain of Things
           </a>
         </div>
         <p
@@ -83,7 +83,7 @@ export default function SiteLayout({ children }) {
             fontWeight: 500
           }}
         >
-          v0.0.5
+          v1.0.1
         </p>
       </Footer>
     </Layout>
