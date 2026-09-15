@@ -2,7 +2,6 @@ import os
 import asyncio
 from dotenv import load_dotenv
 from web3 import AsyncWeb3, WebSocketProvider
-from RPiSim.GPIO import GPIO  # For simulation
 
 # Load environment variables
 load_dotenv()
@@ -11,43 +10,6 @@ WSS_URL = os.getenv("WSS_URL", "wss://ethereum-sepolia-rpc.publicnode.com")
 CONTRACT_ADDRESS = os.getenv(
     "CONTRACT_ADDRESS", "0x0564d5e0277965666d3dfEEf2263AF6748f75327"
 )
-
-PIN_LIST = [
-    14,
-    15,
-    18,
-    23,
-    24,
-    25,
-    8,
-    7,
-    12,
-    16,
-    20,
-    21,
-    2,
-    3,
-    4,
-    17,
-    27,
-    22,
-    10,
-    9,
-    11,
-    5,
-    6,
-    13,
-    19,
-    26,
-]
-
-
-def setup_gpio_pins():
-    """Set up GPIO pins for output."""
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setwarnings(False)
-    for pin in PIN_LIST:
-        GPIO.setup(pin, GPIO.OUT)
 
 
 async def main():
@@ -60,7 +22,6 @@ async def main():
     w3 = AsyncWeb3(WebSocketProvider(WSS_URL))
 
     try:
-        setup_gpio_pins()
         await w3.provider.connect()
         print("Connected to WebSocket provider.")
 
@@ -105,17 +66,12 @@ async def main():
                 "big",
             )
 
-            if pin_number not in PIN_LIST:
-                print(f"Pin {pin_number} is not in the GPIO Setup. Skipping...")
-                continue  # skips the execution
-
-            GPIO.output(pin_number, GPIO.HIGH if pin_status else GPIO.LOW)
             print(f"Pin {pin_number} status changed to {'On' if pin_status else 'Off'}")
+
     except Exception as e:
         print("An error occurred:", e)
 
     finally:
-        GPIO.cleanup()
         await w3.provider.disconnect()
 
 

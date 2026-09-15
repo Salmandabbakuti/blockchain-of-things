@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { createAppKit } from "@reown/appkit/react";
 import { EthersAdapter } from "@reown/appkit-adapter-ethers";
-import { mainnet, polygon, polygonAmoy } from "@reown/appkit/networks";
+import { sepolia, polygon } from "@reown/appkit/networks";
 
 // 1. Get projectId
 const projectId = import.meta.env.VITE_REOWN_PROJECT_ID;
 
 // 2. Set the networks
-const networks = [mainnet, polygon, polygonAmoy];
+const networks = [sepolia, polygon];
 
 // 3. Create a metadata object - optional
 const metadata = {
@@ -20,7 +20,7 @@ const metadata = {
 // 4. Create a AppKit instance
 createAppKit({
   adapters: [new EthersAdapter()],
-  defaultNetwork: polygonAmoy,
+  defaultNetwork: sepolia,
   allowUnsupportedChain: false,
   networks,
   metadata,
