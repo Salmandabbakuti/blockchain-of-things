@@ -1,8 +1,8 @@
 # Blockchain of Things( BoT )
 
-Blockchain of Things( BoT ) is a Raspberry Pi-based IoT project designed for home automation with blockchain integration. The project allows users to control home devices securely and efficiently using blockchain technology, ensuring trust, security, and authentication among IoT devices.
+Blockchain of Things (BoT) is a Raspberry Pi-based IoT project designed for home automation with blockchain integration. The project allows users to control home devices securely and efficiently using blockchain technology, ensuring trust, security, and authentication among IoT devices.
 
-Blockchain of Things( BoT ) leverages the power of Raspberry Pi's GPIO pins to control home devices while integrating blockchain technology for enhanced security and trust among connected devices. The project includes a smart contract system that stores and updates pin statuses with access control by the owner. When authorized users update pin statuses, the contract emits events with the respective device id, pin number and status. A Python listener then detects these events and updates the Raspberry Pi pins accordingly, simulating device control in a secure and decentralized manner.
+Blockchain of Things (BoT) leverages Raspberry Pi GPIO pins to control home devices through a bitmap-based smart contract. Each device ID stores a 256-bit pin state for the connected wallet. When the owner updates a pin, the contract emits an event containing the device ID, pin number, status, and owner. A Python listener receives matching events over WebSocket and updates the corresponding Raspberry Pi pin, or simulates it locally.
 
 ### Architecture
 
@@ -18,98 +18,52 @@ Blockchain of Things( BoT ) leverages the power of Raspberry Pi's GPIO pins to c
 - [Windows Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) - Only for Windows (Simulating GPIO pins on Windows)
 - [Raspberry Pi](https://www.raspberrypi.org/products/raspberry-pi-4-model-b/) (for actual GPIO pins)
 
-### Steps
+### Setup
 
-This project consists of three main components:
+#### 1. Deploy the contract
 
-#### 1. Compiling and Deploying Contract
+Copy `.env.example` to `.env` for the listener configuration. The Hardhat deployment account is configured through the Hardhat keystore.
 
-> Copy `.env.example` to `.env` and fill in the required environment variables.
-
-1. Install required dependencies
+Install the root dependencies, compile the contract, store a dedicated test account's private key, and deploy to Sepolia:
 
 ```bash
 npm install
-```
-
-2. Compile the contract
-
-```bash
 npx hardhat compile
-```
-
-3. Set Private Key to hardhat config variables (For deploying contract to network. Make sure you dont use your primary account)
-
-```bash
 npx hardhat keystore set PRIVATE_KEY
+npx hardhat ignition deploy ignition/modules/DeviceRegistry.ts --network sepolia
 ```
 
-3. Deploy the contract
+#### 2. Start the client
 
-```bash
-npx hardhat ignition deploy ignition/modules/PinController.ts --network polygonAmoy
-```
+Copy `client/.env.example` to `client/.env` and set the AppKit client ID.
 
-#### 2. Starting Client
-
-> Copy `client/.env.example` to `client/.env` and fill in the deployed contract address and other required environment variables.
-
-1. Install required dependencies
+Install the client dependencies and start the Vite server:
 
 ```bash
 cd client
-
 npm install
-```
-
-2. Start the client
-
-```bash
-
 npm run dev
 ```
 
-3. Navigate to `http://localhost:3000` in your browser to see the client. Connect your wallet and start using the app.
+Open `http://localhost:3000` and connect a wallet on Sepolia. Enter a device ID and click the arrow button to load its current GPIO bitmap.
 
-4. Register Device with the contract by clicking the "+ Device" button in the client interface.
+<img width="1378" height="856" alt="usage-screen" src="https://github.com/user-attachments/assets/b9f022a2-de64-4d76-bdfb-3a26c7021085" />
 
-5. Load the control panel with registered device Id by entering device Id and click on arrow button.
+#### 3. Start the event listener
 
-![usage_screen](https://github.com/Salmandabbakuti/depin-bnb-hack/assets/29351207/78e0995b-e591-4278-8c0c-f6746cf54163)
+From the project root, copy `.env.example` to `.env` and set `CONTRACT_ADDRESS` and `WSS_URL` if you are not using the defaults.
 
-#### 3. Setup Contract Event Listener and Rasp Pi GPIO Simulator
-
-> Copy `.env.example` to `.env` and fill in the contract address and RPC URL.
-
-1. Install required dependencies
+Install the Python dependencies and start the listener:
 
 ```bash
 pip install -r requirements.txt
-```
 
-2. Run the event listener
-
-```bash
 python listener.py
 ```
 
-3. Enter the registered device Id in previous step when prompted.
+When prompted, enter the same device ID loaded in the client and the connected wallet owner address. The listener filters events for that exact device and owner.
 
-![listener_prompt](https://github.com/Salmandabbakuti/depin-bnb-hack/assets/29351207/d67ab995-0ceb-4c37-9a76-db3d6473bce3)
-
-## Usage
-
-1. Connect your wallet to the client interface and register a device with the contract.
-
-2. Load the control panel with registered device Id by entering device Id and click on arrow icon.
-
-3. Start the event listener in new terminal and enter the registered device Id when prompted.
-
-4. Use the client interface to turn pins on or off.
-
-5. The event listener will listen for choosen device events in the contract and simulate/update the GPIO pins on the Raspberry Pi.
-
-![usage_screen](https://github.com/Salmandabbakuti/depin-bnb-hack/assets/29351207/78e0995b-e591-4278-8c0c-f6746cf54163)
+The listener uses `GPIOSimulator` by default. For a physical Raspberry Pi, install and enable `RPi.GPIO` in place of the simulator import, then run the same listener command.
 
 ![listener_prompt](https://github.com/Salmandabbakuti/depin-bnb-hack/assets/29351207/d67ab995-0ceb-4c37-9a76-db3d6473bce3)
 

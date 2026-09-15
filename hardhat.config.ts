@@ -1,15 +1,17 @@
 import hardhatToolboxViemPlugin from "@nomicfoundation/hardhat-toolbox-viem";
 import { configVariable, defineConfig } from "hardhat/config";
 
+const accounts = [configVariable("PRIVATE_KEY")];
+
 export default defineConfig({
   plugins: [hardhatToolboxViemPlugin],
   solidity: {
     profiles: {
       default: {
-        version: "0.8.28"
+        version: "0.8.37"
       },
       production: {
-        version: "0.8.28",
+        version: "0.8.37",
         settings: {
           optimizer: {
             enabled: true,
@@ -20,17 +22,17 @@ export default defineConfig({
     }
   },
   networks: {
-    polygonAmoy: {
+    sepolia: {
       type: "http",
       chainType: "l1",
-      url: "https://rpc-amoy.polygon.technology/",
-      accounts: [configVariable("PRIVATE_KEY")]
+      url: "https://ethereum-sepolia-rpc.publicnode.com",
+      accounts
     },
     polygon: {
       type: "http",
       chainType: "l1",
-      url: "https://polygon-rpc.com/",
-      accounts: [configVariable("PRIVATE_KEY")]
+      url: "https://polygon.drpc.org",
+      accounts
     }
   }
 });

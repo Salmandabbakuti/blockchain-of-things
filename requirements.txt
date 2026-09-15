@@ -1,5 +1,4 @@
-web3==7.14.0
-simplejson==3.19.2
-python-dotenv==1.0.0
+web3==8.0.0
+python-dotenv==1.2.3
 GPIOSimulator==0.1 #Rasp-pi Simulator package
 #RPi.GPIO==0.7.1 #use when connected to real rasp-pi

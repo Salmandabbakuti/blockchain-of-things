@@ -1,0 +1,48 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_37-b354c2c52d2b6d780f9cabb3acf529162cda9223",
+  "solcVersion": "0.8.37",
+  "solcLongVersion": "0.8.37+commit.f401782d",
+  "compilerType": "solc",
+  "toolVersions": {
+    "hardhat": "3.16.0"
+  },
+  "userSourceNameMap": {
+    "contracts/DeviceRegistry.sol": "project/contracts/DeviceRegistry.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode.linkReferences",
+            "evm.bytecode.object",
+            "evm.bytecode.opcodes",
+            "evm.bytecode.sourceMap",
+            "evm.deployedBytecode.immutableReferences",
+            "evm.deployedBytecode.linkReferences",
+            "evm.deployedBytecode.object",
+            "evm.deployedBytecode.opcodes",
+            "evm.deployedBytecode.sourceMap",
+            "evm.methodIdentifiers"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/DeviceRegistry.sol": {
+        "content": "// SPDX-License-Identifier: MIT\npragma solidity 0.8.37;\n\ncontract DeviceRegistry {\n    \n    enum PinStatus {\n        Off,\n        On\n    }\n\n    // Mapping: Owner Address => Device ID => 256-bit Pin Bitmap\n    // Each unique Device ID consumes exactly one 32-byte storage slot.\n    mapping(address owner => mapping(uint256 deviceId => uint256)) internal deviceBitmaps;\n\n    event DevicePinStatusChanged(\n        uint256 indexed deviceId,\n        uint8 indexed pin,\n        PinStatus status,\n        address indexed owner\n    );\n\n    /**\n     * @notice Updates the on/off status of a specific pin.\n     * @param _deviceId The unique ID of the device.\n     * @param _pin The GPIO pin number (0 to 26).\n     * @param _pinStatus The target status (0 = Off, 1 = On).\n     */\n    function setDevicePinStatus(\n        uint256 _deviceId,\n        uint8 _pin,\n        PinStatus _pinStatus\n    ) external {\n        // Cache the current bitmask in memory to save gas on lookups\n        uint256 currentBitmap = deviceBitmaps[msg.sender][_deviceId];\n\n        if (_pinStatus == PinStatus.On) {\n            // Flip the target pin bit to 1 using bitwise OR (|)\n            deviceBitmaps[msg.sender][_deviceId] = currentBitmap | (1 << _pin);\n        } else {\n            // Flip the target pin bit to 0 using bitwise AND (&) and NOT (~)\n            deviceBitmaps[msg.sender][_deviceId] = currentBitmap & ~(1 << _pin);\n        }\n\n        emit DevicePinStatusChanged(_deviceId, _pin, _pinStatus, msg.sender);\n    }\n\n    /**\n     * @notice gets the pin status of caller's device.\n     * \n     */\n    function getDevicePinStatus(\n        uint256 _deviceId,\n        uint8 _pin\n    ) public view returns (PinStatus) {\n        // Shift the bitmask right and check the lowest bit value\n        uint256 bit = (deviceBitmaps[msg.sender][_deviceId] >> _pin) & 1;\n        return PinStatus(bit);\n    }\n\n    /**\n     * @notice Fetches the full 256-bit status map of a caller device.\n     * \n     */\n    function getFullDeviceBitmap(uint256 _deviceId) external view returns (uint256) {\n        return deviceBitmaps[msg.sender][_deviceId];\n    }\n}\n"
+      }
+    }
+  }
+}
