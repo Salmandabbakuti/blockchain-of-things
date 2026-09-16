@@ -41,7 +41,9 @@
   line-height: 1.65;
 }
 
-.hero-cta { margin: 30px 0 42px; }
+.hero-cta {
+  margin: 30px 0 42px;
+}
 
 .workflow {
   display: flex;
@@ -51,8 +53,6 @@
   font-size: .86rem;
   font-weight: 600;
 }
-
-.workflow svg { color: #9aaba2; font-size: .72rem; }
 
 .dashboard-container {
   width: min(100%, 1240px);
@@ -75,9 +75,14 @@
   letter-spacing: -.035em;
 }
 
-.console-header p { margin: 0; color: #68756f; }
+.console-header p {
+  margin: 0;
+  color: #68756f;
+}
 
-.device-loader { min-width: 290px; }
+.device-loader {
+  min-width: 290px;
+}
 
 .device-loader label {
   display: block;
@@ -87,7 +92,9 @@
   font-weight: 700;
 }
 
-.overview-cards { margin: 26px 0 32px; }
+.overview-cards {
+  margin: 26px 0 32px;
+}
 
 .pins-heading {
   margin-bottom: 20px;
@@ -95,18 +102,42 @@
   border-top: 1px solid #e5e9e6;
 }
 
-.pins-heading h3 { margin: 0 0 4px; }
-.pins-heading p { margin: 0; color: #68756f; font-size: .84rem; }
+.pins-heading h3 {
+  margin: 0 0 4px;
+}
+
+.pins-heading p {
+  margin: 0;
+  color: #68756f;
+  font-size: .84rem;
+}
 
 @media (max-width: 720px) {
-  .hero-section { padding: 48px 22px; }
-  .workflow { gap: 8px; font-size: .73rem; }
-  .console-header { display: block; }
-  .device-loader { min-width: 0; margin-top: 22px; }
+  .hero-section {
+    padding: 48px 22px;
+  }
+
+  .workflow {
+    gap: 8px;
+    font-size: .73rem;
+  }
+
+  .console-header {
+    display: block;
+  }
+
+  .device-loader {
+    min-width: 0;
+    margin-top: 22px;
+  }
 }
 
 @media (max-width: 420px) {
-  .dashboard-container { padding: 16px 10px 36px; }
-  .workflow { justify-content: space-between; }
-  .workflow svg { display: none; }
+  .dashboard-container {
+    padding: 16px 10px 36px;
+  }
+
+  .workflow {
+    justify-content: space-between;
+  }
 }

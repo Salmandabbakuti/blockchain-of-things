@@ -1,14 +1,6 @@
-import { Contract, JsonRpcProvider } from "ethers";
+import { Contract } from "ethers";
 
 const CONTRACT_ADDRESS = "0x0db6d7f70754f0acd4ab664f4e3ace9f6c5f08c9";
-
-const defaultProvider = new JsonRpcProvider(
-  "https://ethereum-sepolia-rpc.publicnode.com",
-  11155111,
-  {
-    staticNetwork: true
-  }
-);
 
 const CONTRACT_ABI = [
   "event DevicePinStatusChanged(uint256 indexed _deviceId, uint8 indexed pin, uint8 status)",
@@ -17,11 +9,7 @@ const CONTRACT_ABI = [
   "function getFullDeviceBitmap(uint256 _deviceId) view returns (uint256)"
 ];
 
-export const contract = new Contract(
-  CONTRACT_ADDRESS,
-  CONTRACT_ABI,
-  defaultProvider
-);
+export const contract = new Contract(CONTRACT_ADDRESS, CONTRACT_ABI);
 
 export const supportedPins = [
   14, 15, 18, 23, 24, 25, 8, 7, 12, 16, 20, 21, 2, 3, 4, 17, 27, 22, 10, 9, 11,

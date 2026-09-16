@@ -1,4 +1,4 @@
-# Blockchain of Things( BoT )
+# Blockchain of Things (BoT)
 
 Blockchain of Things (BoT) is a Raspberry Pi-based IoT project designed for home automation with blockchain integration. The project allows users to control home devices securely and efficiently using blockchain technology, ensuring trust, security, and authentication among IoT devices.
 

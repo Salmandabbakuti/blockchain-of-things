@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { BrowserProvider } from "ethers";
 import { useAppKitProvider, useAppKitAccount } from "@reown/appkit/react";
 import {
@@ -12,7 +12,6 @@ import {
   Col,
   Descriptions,
   Empty,
-  Flex,
   Badge,
   Statistic,
   Space,
@@ -32,22 +31,23 @@ function App() {
   const selectedChainId = caipAddress?.split(":")?.[1];
   const { walletProvider } = useAppKitProvider("eip155");
 
-  const activePins = useMemo(
-    () => supportedPins.filter((pin) => pinStates[pin]).length,
-    [pinStates]
-  );
+  const activePins = supportedPins.filter((pin) => pinStates[pin]).length;
 
   const deviceDetailItems = [
     {
       key: "id",
       label: "Device ID",
-      children: <Typography.Text strong>#{deviceId}</Typography.Text>
+      children: (
+        <Typography.Text strong copyable={{ text: deviceId }}>
+          #{deviceId}
+        </Typography.Text>
+      )
     },
     {
       key: "owner",
       label: "Owner",
       children: (
-        <Typography.Text code>
+        <Typography.Text code copyable={{ text: account }}>
           {account?.slice(0, 6)}...{account?.slice(-6)}
         </Typography.Text>
       )
@@ -146,7 +146,9 @@ function App() {
       setPinStates({ ...pinStates, [pin]: status });
     } catch (err) {
       console.log("err setting pin status", err);
-      message.error("Failed to set pin status");
+      message.error(
+        `Failed to set pin ${pin} status: ${err?.reason || err?.message || "Unknown error"}`
+      );
       setPinStates({ ...pinStates, [pin]: !status });
     } finally {
       setLoading({ [pin]: false });
@@ -163,8 +165,8 @@ function App() {
                 <span className="eyebrow">DEVICE CONSOLE</span>
                 <h2 id="console-title">GPIO control, recorded on-chain.</h2>
                 <p>
-                  Load a device to read and update the pin map associated with
-                  your connected wallet.
+                  Load device to read or update the pin map associated with your
+                  connected wallet.
                 </p>
               </div>
               <div className="device-loader">
@@ -172,6 +174,7 @@ function App() {
                 <Space.Compact>
                   <Input
                     id="device-id"
+                    size="large"
                     inputMode="numeric"
                     type="number"
                     min="0"
@@ -182,6 +185,7 @@ function App() {
                   />
                   <Button
                     type="primary"
+                    size="large"
                     icon={<ArrowRightOutlined />}
                     loading={loading.device}
                     onClick={loadDevice}
@@ -205,7 +209,7 @@ function App() {
                       >
                         <Descriptions
                           colon={false}
-                          column={{ xs: 2, sm: 2, md: 3 }}
+                          column={{ xs: 2 }}
                           items={deviceDetailItems}
                           layout="vertical"
                           size="small"
@@ -221,7 +225,7 @@ function App() {
                       >
                         <Descriptions
                           colon={false}
-                          column={{ xs: 2, sm: 3 }}
+                          column={3}
                           items={pinActivityItems}
                           layout="vertical"
                           size="small"
@@ -315,11 +319,7 @@ function App() {
                 </Row>
               </>
             ) : (
-              <Empty description="Open a device to see its GPIO controls">
-                <Typography.Paragraph type="secondary">
-                  Use the device ID configured in your Raspberry Pi listener.
-                </Typography.Paragraph>
-              </Empty>
+              <Empty description="Load the device with the ID configured in your Raspberry Pi listener."></Empty>
             )}
           </Card>
         </div>
