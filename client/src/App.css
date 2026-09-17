@@ -1,7 +1,6 @@
 .App {
   width: 100%;
   min-height: 100%;
-  background: #f7f8f8;
   color: #17201d;
 }
 
@@ -17,7 +16,6 @@
   min-height: calc(100vh - 128px);
   place-items: center;
   padding: 72px 24px;
-  background: #f1f3f1;
 }
 
 .hero-content {

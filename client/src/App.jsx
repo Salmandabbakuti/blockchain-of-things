@@ -17,7 +17,7 @@ import {
   Space,
   Tag
 } from "antd";
-import { ArrowRightOutlined, PoweroffOutlined } from "@ant-design/icons";
+import { LoginOutlined } from "@ant-design/icons";
 import { supportedPins, contract } from "./utils";
 import "./App.css";
 
@@ -47,7 +47,7 @@ function App() {
       key: "owner",
       label: "Owner",
       children: (
-        <Typography.Text code copyable={{ text: account }}>
+        <Typography.Text strong copyable={{ text: account }}>
           {account?.slice(0, 6)}...{account?.slice(-6)}
         </Typography.Text>
       )
@@ -186,7 +186,8 @@ function App() {
                   <Button
                     type="primary"
                     size="large"
-                    icon={<ArrowRightOutlined />}
+                    title="Load device"
+                    icon={<LoginOutlined />}
                     loading={loading.device}
                     onClick={loadDevice}
                   />
@@ -246,20 +247,7 @@ function App() {
                     <Col key={pin} xs={12} sm={8} md={6} lg={4} xl={3}>
                       <Card
                         title="GPIO"
-                        extra={
-                          <Typography.Text
-                            strong
-                            type={
-                              loading[pin]
-                                ? "warning"
-                                : pinStates[pin]
-                                  ? "success"
-                                  : undefined
-                            }
-                          >
-                            {pin}
-                          </Typography.Text>
-                        }
+                        extra={<Typography.Text strong>{pin}</Typography.Text>}
                         hoverable
                         size="small"
                         styles={{
@@ -286,7 +274,6 @@ function App() {
                           }}
                         >
                           <Switch
-                            size="small"
                             loading={Boolean(loading[pin])}
                             checked={Boolean(pinStates[pin])}
                             onChange={(checked) =>
@@ -295,21 +282,13 @@ function App() {
                           />
 
                           {loading[pin] ? (
-                            <Badge
-                              status="processing"
-                              text={
-                                <Typography.Text strong type="warning">
-                                  Updating…
-                                </Typography.Text>
-                              }
-                            />
+                            <Badge status="processing" text="Updating..." />
                           ) : (
                             <Typography.Text
                               strong
                               type={pinStates[pin] ? "success" : "secondary"}
                             >
-                              {pinStates[pin] ? <PoweroffOutlined /> : null}{" "}
-                              {pinStates[pin] ? "On" : "Off"}
+                              {pinStates[pin] ? "🟢 ON" : "⚫️ OFF"}
                             </Typography.Text>
                           )}
                         </Space>
@@ -338,10 +317,8 @@ function App() {
               <appkit-button />
             </div>
             <div className="workflow" aria-label="How it works">
-              <span>Connect wallet</span>
-              <ArrowRightOutlined />
-              <span>Load device</span>
-              <ArrowRightOutlined />
+              <span>Connect wallet ❯</span>
+              <span>Load device ❯</span>
               <span>Control GPIO</span>
             </div>
           </div>

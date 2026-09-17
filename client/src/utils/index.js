@@ -12,6 +12,6 @@ const CONTRACT_ABI = [
 export const contract = new Contract(CONTRACT_ADDRESS, CONTRACT_ABI);
 
 export const supportedPins = [
-  14, 15, 18, 23, 24, 25, 8, 7, 12, 16, 20, 21, 2, 3, 4, 17, 27, 22, 10, 9, 11,
-  5, 6, 13, 19, 26
+  2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
+  23, 24, 25, 26, 27
 ];

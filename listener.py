@@ -1,5 +1,6 @@
 import os
 import asyncio
+from datetime import datetime
 from dotenv import load_dotenv
 from web3 import AsyncWeb3, WebSocketProvider
 from RPiSim.GPIO import GPIO  # For simulation
@@ -56,6 +57,7 @@ async def main():
     # Get filters before opening the WebSocket connection
     device_id = int(input("Enter the device id: "))
     owner_address = input("Enter the owner address: ")
+    owner_address_ellipsized = f"{owner_address[:6]}...{owner_address[-4:]}"
 
     w3 = AsyncWeb3(WebSocketProvider(WSS_URL))
 
@@ -87,7 +89,7 @@ async def main():
 
         print(
             f"Listening for DevicePinStatusChanged events "
-            f"for device {device_id} of {owner_address}"
+            f"for device {device_id} of {owner_address_ellipsized}"
         )
 
         async for response in w3.socket.process_subscriptions():
@@ -110,7 +112,16 @@ async def main():
                 continue  # skips the execution
 
             GPIO.output(pin_number, GPIO.HIGH if pin_status else GPIO.LOW)
-            print(f"Pin {pin_number} status changed to {'On' if pin_status else 'Off'}")
+
+            # print the event details with timestamp
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            print(
+                f"[{timestamp}]: "
+                f"[{owner_address_ellipsized}][{device_id}] "
+                f"GPIO {pin_number} → "
+                f"{'🟢 ON' if pin_status else '⚫️ OFF'}"
+            )
+
     except Exception as e:
         print("An error occurred:", e)
 
