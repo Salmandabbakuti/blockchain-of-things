@@ -15,32 +15,8 @@ CONTRACT_ADDRESS = os.getenv(
 )
 
 PIN_LIST = [
-    14,
-    15,
-    18,
-    23,
-    24,
-    25,
-    8,
-    7,
-    12,
-    16,
-    20,
-    21,
-    2,
-    3,
-    4,
-    17,
-    27,
-    22,
-    10,
-    9,
-    11,
-    5,
-    6,
-    13,
-    19,
-    26,
+    2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+    15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
 ]
 
 
@@ -66,24 +42,43 @@ async def main():
         setup_gpio_pins()
         await w3.provider.connect()
         print("Connected to WebSocket provider.")
+        
+        # Read current bitmap for the device and owner
+        selector = w3.keccak(text="deviceBitmaps(address,uint256)")[:4]
+        owner_bytes = bytes.fromhex(owner_address[2:].zfill(64))
+        device_id_bytes = device_id.to_bytes(32, "big")
+        contract_address_checksum = w3.to_checksum_address(CONTRACT_ADDRESS)
 
-        event_topic = w3.keccak(
-            text="DevicePinStatusChanged(uint256,uint8,uint8,address)"
-        )
+        calldata =(selector + owner_bytes + device_id_bytes)
 
-        device_id_topic = device_id.to_bytes(32, "big")
+        result = await w3.eth.call({
+            "to": contract_address_checksum,
+            "data": calldata
+        })
 
-        owner_topic = bytes.fromhex(owner_address[2:].lower().zfill(64))
+        current_bitmap = int.from_bytes(result, "big")
+
+        for pin in PIN_LIST:
+            pin_status = (current_bitmap >> pin) & 1
+            GPIO.output(pin, GPIO.HIGH if pin_status else GPIO.LOW)
+            print(
+                f"[{owner_address_ellipsized}][{device_id}] "
+                f"GPIO {pin} → "
+                f"{'🟢 ON' if pin_status else '⚫️ OFF'}"
+            )
+            
+
+        event_topic = w3.keccak(text="DevicePinStatusChanged(uint256,uint8,uint8,address)")
 
         subscription_id = await w3.eth.subscribe(
             "logs",
             {
-                "address": w3.to_checksum_address(CONTRACT_ADDRESS),
+                "address": contract_address_checksum,
                 "topics": [
                     event_topic,
-                    device_id_topic,
+                    device_id_bytes,
                     None,  # any pin
-                    owner_topic,
+                    owner_bytes
                 ],
             },
         )

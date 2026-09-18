@@ -346,7 +346,21 @@ function App() {
                 </Row>
               </>
             ) : (
-              <Empty description="Load the device with the ID configured in your Raspberry Pi listener."></Empty>
+              <Empty
+                description={
+                  <p>
+                    Load the device with the ID configured in your Raspberry Pi
+                    listener.{" "}
+                    <Typography.Link
+                      href="https://github.com/Salmandabbakuti/blockchain-of-things"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Learn more
+                    </Typography.Link>
+                  </p>
+                }
+              />
             )}
           </Card>
         </div>
@@ -362,7 +376,17 @@ function App() {
               receives the event and updates the device.
             </p>
             <div className="hero-cta">
-              <appkit-button />
+              <Space>
+                <appkit-button />
+                <Button
+                  type="link"
+                  size="large"
+                  href="https://github.com/Salmandabbakuti/blockchain-of-things?tab=readme-ov-file"
+                  target="_blank"
+                >
+                  Learn More
+                </Button>
+              </Space>
             </div>
             <div className="workflow" aria-label="How it works">
               <span>Connect wallet ❯</span>

@@ -17,64 +17,6 @@ PIN_LIST = [
     15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
 ]
 
-CONTRACT_ABI = [
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "owner",
-                "type": "address",
-            },
-            {
-                "internalType": "uint256",
-                "name": "deviceId",
-                "type": "uint256",
-            },
-        ],
-        "name": "deviceBitmaps",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256",
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function",
-    },
-    {
-        "anonymous": False,
-        "inputs": [
-            {
-                "indexed": True,
-                "internalType": "uint256",
-                "name": "deviceId",
-                "type": "uint256",
-            },
-            {
-                "indexed": True,
-                "internalType": "uint8",
-                "name": "pin",
-                "type": "uint8",
-            },
-            {
-                "indexed": False,
-                "internalType": "uint8",
-                "name": "status",
-                "type": "uint8",
-            },
-            {
-                "indexed": True,
-                "internalType": "address",
-                "name": "owner",
-                "type": "address",
-            },
-        ],
-        "name": "DevicePinStatusChanged",
-        "type": "event",
-    },
-]
-
 
 async def main():
     """Listen for DevicePinStatusChanged events."""
@@ -89,17 +31,20 @@ async def main():
     try:
         await w3.provider.connect()
         print("Connected to WebSocket provider.")
-
-        # contract instance
-        contract = w3.eth.contract(
-            address=w3.to_checksum_address(CONTRACT_ADDRESS),
-            abi=CONTRACT_ABI,
-        )
-        print("Syncing device pin states with the contract...")
         # Read current bitmap for the device and owner
-        current_bitmap = await contract.functions.deviceBitmaps(
-            owner_address, device_id
-        ).call()
+        selector = w3.keccak(text="deviceBitmaps(address,uint256)")[:4]
+        owner_bytes = bytes.fromhex(owner_address[2:].zfill(64))
+        device_id_bytes = device_id.to_bytes(32, "big")
+        contract_address_checksum = w3.to_checksum_address(CONTRACT_ADDRESS)
+
+        calldata = (selector + owner_bytes + device_id_bytes)
+
+        result = await w3.eth.call({
+            "to": contract_address_checksum,
+            "data": calldata
+        })
+
+        current_bitmap = int.from_bytes(result, "big")
 
         for pin in PIN_LIST:
             pin_status = (current_bitmap >> pin) & 1
@@ -109,21 +54,17 @@ async def main():
                 f"{'🟢 ON' if pin_status else '⚫️ OFF'}"
             )
 
-        event = contract.events.DevicePinStatusChanged()
-
-        device_id_topic = device_id.to_bytes(32, "big")
-
-        owner_topic = bytes.fromhex(owner_address[2:].lower().zfill(64))
+        event_topic = w3.keccak(text="DevicePinStatusChanged(uint256,uint8,uint8,address)")
 
         subscription_id = await w3.eth.subscribe(
             "logs",
             {
-                "address": w3.to_checksum_address(CONTRACT_ADDRESS),
+                "address": contract_address_checksum,
                 "topics": [
-                    event.topic,
-                    device_id_topic,
+                    event_topic,
+                    device_id_bytes,
                     None,  # any pin
-                    owner_topic,
+                    owner_bytes,
                 ],
             },
         )
@@ -137,10 +78,15 @@ async def main():
 
             log = response["result"]
             # decode pin and status from logs, decode device_id, owner if needed for validation
-            decoded_event = event.processLog(log)
-            event_args = decoded_event["args"]
-            pin_number = event_args["pin"]
-            pin_status = event_args["status"]
+            pin_number = int.from_bytes(
+                log["topics"][2],
+                "big",
+            )
+
+            pin_status = int.from_bytes(
+                log["data"],
+                "big",
+            )
 
 
             # print the event details with timestamp
