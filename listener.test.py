@@ -12,6 +12,69 @@ CONTRACT_ADDRESS = os.getenv(
     "CONTRACT_ADDRESS", "0xbDe07ed4Da072DcBDb4348667cd74d155712dDAe"
 )
 
+PIN_LIST = [
+    2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+    15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
+]
+
+CONTRACT_ABI = [
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address",
+            },
+            {
+                "internalType": "uint256",
+                "name": "deviceId",
+                "type": "uint256",
+            },
+        ],
+        "name": "deviceBitmaps",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256",
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+    },
+    {
+        "anonymous": False,
+        "inputs": [
+            {
+                "indexed": True,
+                "internalType": "uint256",
+                "name": "deviceId",
+                "type": "uint256",
+            },
+            {
+                "indexed": True,
+                "internalType": "uint8",
+                "name": "pin",
+                "type": "uint8",
+            },
+            {
+                "indexed": False,
+                "internalType": "uint8",
+                "name": "status",
+                "type": "uint8",
+            },
+            {
+                "indexed": True,
+                "internalType": "address",
+                "name": "owner",
+                "type": "address",
+            },
+        ],
+        "name": "DevicePinStatusChanged",
+        "type": "event",
+    },
+]
+
 
 async def main():
     """Listen for DevicePinStatusChanged events."""
@@ -27,9 +90,26 @@ async def main():
         await w3.provider.connect()
         print("Connected to WebSocket provider.")
 
-        event_topic = w3.keccak(
-            text="DevicePinStatusChanged(uint256,uint8,uint8,address)"
+        # contract instance
+        contract = w3.eth.contract(
+            address=w3.to_checksum_address(CONTRACT_ADDRESS),
+            abi=CONTRACT_ABI,
         )
+        print("Syncing device pin states with the contract...")
+        # Read current bitmap for the device and owner
+        current_bitmap = await contract.functions.deviceBitmaps(
+            owner_address, device_id
+        ).call()
+
+        for pin in PIN_LIST:
+            pin_status = (current_bitmap >> pin) & 1
+            print(
+                f"[{owner_address_ellipsized}][{device_id}] "
+                f"GPIO {pin} → "
+                f"{'🟢 ON' if pin_status else '⚫️ OFF'}"
+            )
+
+        event = contract.events.DevicePinStatusChanged()
 
         device_id_topic = device_id.to_bytes(32, "big")
 
@@ -40,7 +120,7 @@ async def main():
             {
                 "address": w3.to_checksum_address(CONTRACT_ADDRESS),
                 "topics": [
-                    event_topic,
+                    event.topic,
                     device_id_topic,
                     None,  # any pin
                     owner_topic,
@@ -57,16 +137,11 @@ async def main():
 
             log = response["result"]
             # decode pin and status from logs, decode device_id, owner if needed for validation
-            pin_number = int.from_bytes(
-                log["topics"][2],
-                "big",
-            )
+            decoded_event = event.processLog(log)
+            event_args = decoded_event["args"]
+            pin_number = event_args["pin"]
+            pin_status = event_args["status"]
 
-            # status is the non-indexed value
-            pin_status = int.from_bytes(
-                log["data"],
-                "big",
-            )
 
             # print the event details with timestamp
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
