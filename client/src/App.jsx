@@ -15,9 +15,10 @@ import {
   Badge,
   Statistic,
   Space,
-  Tag
+  Tag,
+  Tooltip
 } from "antd";
-import { LoginOutlined } from "@ant-design/icons";
+import { LoginOutlined, ReloadOutlined } from "@ant-design/icons";
 import { supportedPins, contract } from "./utils";
 import "./App.css";
 
@@ -107,10 +108,12 @@ function App() {
       const signer = await provider.getSigner();
       const bitmap = await contract
         .connect(signer)
-        .getFullDeviceBitmap(deviceIdInput);
-      const nextPinStates = Object.fromEntries(
-        supportedPins.map((pin) => [pin, Boolean((bitmap >> BigInt(pin)) & 1n)])
-      );
+        .deviceBitmaps(account, deviceIdInput);
+      const nextPinStates = {};
+      for (const pin of supportedPins) {
+        // We use Number(bitmap) if bitmap is a BigInt, or safely bit-shift if it fits
+        nextPinStates[pin] = Boolean((bitmap >> BigInt(pin)) & 1n);
+      }
       setDeviceId(deviceIdInput);
       setPinStates(nextPinStates);
       message.success(`Device ${deviceIdInput} loaded`);
@@ -152,6 +155,31 @@ function App() {
       setPinStates({ ...pinStates, [pin]: !status });
     } finally {
       setLoading({ [pin]: false });
+    }
+  };
+
+  const handleResetPins = async () => {
+    if (deviceId === null) return message.error("Load a device first");
+    if (!account || !walletProvider)
+      return message.error("Please connect your wallet");
+    if (selectedChainId !== "11155111")
+      return message.error("Please switch to sepolia network");
+    try {
+      setLoading({ reset: true });
+      // TODO: Enable this transaction when on-chain reset is ready.
+      const ethersProvider = new BrowserProvider(walletProvider);
+      const signer = await ethersProvider.getSigner();
+      const tx = await contract.connect(signer).resetDeviceBitmap(deviceId);
+      await tx.wait();
+      setPinStates({}); // Reset pin states locally
+      message.success("Device pin states reset successfully");
+    } catch (err) {
+      console.log("err resetting pins", err);
+      message.error(
+        `Failed to reset pins: ${err?.reason || err?.message || "Unknown error"}`
+      );
+    } finally {
+      setLoading({ reset: false });
     }
   };
 
@@ -236,11 +264,31 @@ function App() {
                   </Row>
                 </section>
                 <div className="pins-heading">
-                  <h3>Pin controls</h3>
-                  <p>
-                    Each change sends a transaction, then your listener can
-                    update the Raspberry Pi.
-                  </p>
+                  <div className="pins-heading-content">
+                    <h3>Pin controls</h3>
+                    <p>
+                      Each change sends a transaction, then your listener can
+                      update the Raspberry Pi.{" "}
+                      <Typography.Link
+                        href="https://github.com/Salmandabbakuti/blockchain-of-things#3-start-the-event-listener"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Learn more
+                      </Typography.Link>
+                    </p>
+                  </div>
+                  <Tooltip title="Use this when the physical device is out of sync or has restarted">
+                    <Button
+                      type="primary"
+                      icon={<ReloadOutlined />}
+                      shape="round"
+                      onClick={handleResetPins}
+                      loading={loading.reset}
+                    >
+                      Reset
+                    </Button>
+                  </Tooltip>
                 </div>
                 <Row gutter={[8, 8]}>
                   {supportedPins.map((pin) => (

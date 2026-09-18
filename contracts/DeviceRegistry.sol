@@ -2,15 +2,14 @@
 pragma solidity 0.8.37;
 
 contract DeviceRegistry {
-    
     enum PinStatus {
         Off,
         On
     }
 
-    // Mapping: Owner Address => Device ID => 256-bit Pin Bitmap
     // Each unique Device ID consumes exactly one 32-byte storage slot.
-    mapping(address owner => mapping(uint256 deviceId => uint256)) internal deviceBitmaps;
+    mapping(address owner => mapping(uint256 deviceId => uint256 bitmap))
+        public deviceBitmaps;
 
     event DevicePinStatusChanged(
         uint256 indexed deviceId,
@@ -18,6 +17,8 @@ contract DeviceRegistry {
         PinStatus status,
         address indexed owner
     );
+
+    event DeviceBitmapReset(uint256 indexed deviceId, address indexed owner);
 
     /**
      * @notice Updates the on/off status of a specific pin.
@@ -45,23 +46,13 @@ contract DeviceRegistry {
     }
 
     /**
-     * @notice gets the pin status of caller's device.
-     * 
+     * @notice Resets the entire 256-bit pin status bitmap for a specific device.
+     * @dev Useful when device needs to be reinitialized.
+     * @param _deviceId The unique ID of the device.
      */
-    function getDevicePinStatus(
-        uint256 _deviceId,
-        uint8 _pin
-    ) public view returns (PinStatus) {
-        // Shift the bitmask right and check the lowest bit value
-        uint256 bit = (deviceBitmaps[msg.sender][_deviceId] >> _pin) & 1;
-        return PinStatus(bit);
-    }
 
-    /**
-     * @notice Fetches the full 256-bit status map of a caller device.
-     * 
-     */
-    function getFullDeviceBitmap(uint256 _deviceId) external view returns (uint256) {
-        return deviceBitmaps[msg.sender][_deviceId];
+    function resetDeviceBitmap(uint256 _deviceId) external {
+        deviceBitmaps[msg.sender][_deviceId] = 0;
+        emit DeviceBitmapReset(_deviceId, msg.sender);
     }
 }

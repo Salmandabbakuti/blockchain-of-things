@@ -4,13 +4,14 @@ from datetime import datetime
 from dotenv import load_dotenv
 from web3 import AsyncWeb3, WebSocketProvider
 from RPiSim.GPIO import GPIO  # For simulation
+# import RPi.GPIO as GPIO # for real rasp-pi
 
 # Load environment variables
 load_dotenv()
 
 WSS_URL = os.getenv("WSS_URL", "wss://ethereum-sepolia-rpc.publicnode.com")
 CONTRACT_ADDRESS = os.getenv(
-    "CONTRACT_ADDRESS", "0x0db6d7f70754f0acd4ab664f4e3ace9f6c5f08c9"
+    "CONTRACT_ADDRESS", "0xbDe07ed4Da072DcBDb4348667cd74d155712dDAe"
 )
 
 PIN_LIST = [
@@ -121,7 +122,7 @@ async def main():
                 f"GPIO {pin_number} → "
                 f"{'🟢 ON' if pin_status else '⚫️ OFF'}"
             )
-
+    
     except Exception as e:
         print("An error occurred:", e)
 
@@ -131,4 +132,7 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("Stopping...")

@@ -1,12 +1,11 @@
 import { Contract } from "ethers";
 
-const CONTRACT_ADDRESS = "0x0db6d7f70754f0acd4ab664f4e3ace9f6c5f08c9";
+const CONTRACT_ADDRESS = "0xbDe07ed4Da072DcBDb4348667cd74d155712dDAe";
 
 const CONTRACT_ABI = [
-  "event DevicePinStatusChanged(uint256 indexed _deviceId, uint8 indexed pin, uint8 status)",
-  "function getDevicePinStatus(uint256 _deviceId, uint8 _pin) view returns (uint8)",
   "function setDevicePinStatus(uint256 _deviceId, uint8 _pin, uint8 _pinStatus)",
-  "function getFullDeviceBitmap(uint256 _deviceId) view returns (uint256)"
+  "function resetDeviceBitmap(uint256 _deviceId)",
+  "function deviceBitmaps(address owner, uint256 deviceId) view returns (uint256)"
 ];
 
 export const contract = new Contract(CONTRACT_ADDRESS, CONTRACT_ABI);
