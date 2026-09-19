@@ -3,10 +3,10 @@ import asyncio
 from datetime import datetime
 from dotenv import load_dotenv
 from web3 import AsyncWeb3, WebSocketProvider
-from RPiSim.GPIO import GPIO # for simulation
-# import RPi.GPIO as GPIO # for real rasp-pi
+from gpiozero import Device, DigitalOutputDevice
 
 # Load environment variables
+# includes pin factory setting for gpiozero (mock/simulation or native)
 load_dotenv()
 
 WSS_URL = os.getenv("WSS_URL", "wss://ethereum-sepolia-rpc.publicnode.com")
@@ -19,13 +19,10 @@ PIN_LIST = [
     15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
 ]
 
-
-def setup_gpio_pins():
-    """Set up GPIO pins for output."""
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setwarnings(False)
-    for pin in PIN_LIST:
-        GPIO.setup(pin, GPIO.OUT)
+gpio_devices = {
+    pin: DigitalOutputDevice(pin)
+    for pin in PIN_LIST
+}
 
 
 async def main():
@@ -39,7 +36,6 @@ async def main():
     w3 = AsyncWeb3(WebSocketProvider(WSS_URL))
 
     try:
-        setup_gpio_pins()
         await w3.provider.connect()
         print("Connected to WebSocket provider.")
         
@@ -60,11 +56,13 @@ async def main():
 
         for pin in PIN_LIST:
             pin_status = (current_bitmap >> pin) & 1
-            GPIO.output(pin, GPIO.HIGH if pin_status else GPIO.LOW)
+            # Update GPIO pin status based on the current bitmap
+            gpio = gpio_devices[pin]
+            gpio.on() if pin_status else gpio.off()
             print(
                 f"[{owner_address_ellipsized}][{device_id}] "
                 f"GPIO {pin} → "
-                f"{'🟢 ON' if pin_status else '⚫️ OFF'}"
+                f"{'🟢 ON' if gpio.value else '⚫️ OFF'}"
             )
             
 
@@ -106,23 +104,23 @@ async def main():
             if pin_number not in PIN_LIST:
                 print(f"Pin {pin_number} is not in the GPIO Setup. Skipping...")
                 continue  # skips the execution
-
-            GPIO.output(pin_number, GPIO.HIGH if pin_status else GPIO.LOW)
-
+            
+            # Update GPIO pin status based on the event
+            gpio = gpio_devices[pin]
+            gpio.on() if pin_status else gpio.off()
             # print the event details with timestamp
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             print(
                 f"[{timestamp}]: "
                 f"[{owner_address_ellipsized}][{device_id}] "
                 f"GPIO {pin_number} → "
-                f"{'🟢 ON' if pin_status else '⚫️ OFF'}"
+                f"{'🟢 ON' if gpio.value else '⚫️ OFF'}"
             )
     
     except Exception as e:
         print("An error occurred:", e)
 
     finally:
-        GPIO.cleanup()
         await w3.provider.disconnect()
 
 
