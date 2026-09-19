@@ -6,7 +6,11 @@ Blockchain of Things (BoT) leverages Raspberry Pi GPIO pins to control home devi
 
 ### Architecture
 
-![Untitled Diagram drawio (1)](https://github.com/Salmandabbakuti/depin-bnb-hack/assets/29351207/7e1e5b3c-6a84-434b-9b17-cfbe6aaacdc4)
+<img width="1774" height="887" alt="bot_architeture01" src="https://github.com/user-attachments/assets/5d1d55fa-46e8-41e2-a8df-634041de65c9" />
+
+The application has two related flows: the user submits a pin change through the web client, and the Raspberry Pi listener reacts to the confirmed blockchain event.
+
+When the device is loaded, both the web client and the listener read the existing bitmap first. This synchronizes their starting state before processing new pin update events. Resetting a device sets its bitmap to zero and emits `DeviceBitmapReset`.
 
 ## Getting Started
 
@@ -47,7 +51,7 @@ npm run dev
 
 Open `http://localhost:3000` and connect a wallet on Sepolia. Enter a device ID and click the arrow button to load its current GPIO bitmap.
 
-<img width="1378" height="856" alt="usage-screen" src="https://github.com/user-attachments/assets/b9f022a2-de64-4d76-bdfb-3a26c7021085" />
+<img width="1383" height="853" alt="usage-screen-client" src="https://github.com/user-attachments/assets/d811ef79-c26b-471b-bb62-828329b34462" />
 
 #### 3. Start the event listener
 
@@ -69,7 +73,31 @@ The listener uses `GPIOSimulator` by default. For a physical Raspberry Pi, insta
 
 ## Demo
 
-![Screen1](https://github.com/Salmandabbakuti/depin-bnb-hack/assets/29351207/d0900ce0-3b03-411f-97b8-f40d7aa8b627)
+<img width="1334" height="726" alt="bot_demo_screen" src="https://github.com/user-attachments/assets/e985d69d-f69b-421a-a12f-625c0c24a6f7" />
+
+### End-to-end sequence
+
+```mermaid
+sequenceDiagram
+	actor User
+	participant UI as React client
+	participant Wallet as Wallet
+	participant Chain as Sepolia / DeviceRegistry
+	participant Listener as Python listener
+	participant Pi as Raspberry Pi GPIO
+
+	User->>UI: Choose device and toggle pin
+	UI->>Wallet: Request setDevicePinStatus(deviceId, pin, status)
+	Wallet->>Chain: Sign and submit transaction
+	Chain->>Chain: Use msg.sender as owner
+	Chain->>Chain: Update the device bitmap
+	Chain-->>Wallet: Transaction confirmed
+	Chain-->>Listener: DevicePinStatusChanged event
+	Listener->>Listener: Filter device/owner and decode pin/status
+	Listener->>Pi: Set GPIO HIGH or LOW
+	Pi-->>Listener: Pin state applied
+	UI-->>User: Show confirmed pin state
+```
 
 ## Built With
 

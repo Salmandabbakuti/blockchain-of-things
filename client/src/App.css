@@ -95,9 +95,17 @@
 }
 
 .pins-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 20px;
   margin-bottom: 20px;
   padding-top: 26px;
   border-top: 1px solid #e5e9e6;
+}
+
+.pins-heading-content {
+  min-width: 0;
 }
 
 .pins-heading h3 {
@@ -127,6 +135,10 @@
   .device-loader {
     min-width: 0;
     margin-top: 22px;
+  }
+
+  .pins-heading {
+    align-items: start;
   }
 }
 
