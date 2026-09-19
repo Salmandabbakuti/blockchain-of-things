@@ -3,7 +3,7 @@ import asyncio
 from datetime import datetime
 from dotenv import load_dotenv
 from web3 import AsyncWeb3, WebSocketProvider
-from RPiSim.GPIO import GPIO  # For simulation
+from RPiSim import GPIO # for simulation
 # import RPi.GPIO as GPIO # for real rasp-pi
 
 # Load environment variables
@@ -49,7 +49,7 @@ async def main():
         device_id_bytes = device_id.to_bytes(32, "big")
         contract_address_checksum = w3.to_checksum_address(CONTRACT_ADDRESS)
 
-        calldata =(selector + owner_bytes + device_id_bytes)
+        calldata = (selector + owner_bytes + device_id_bytes)
 
         result = await w3.eth.call({
             "to": contract_address_checksum,
