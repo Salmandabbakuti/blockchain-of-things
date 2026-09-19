@@ -106,7 +106,7 @@ async def main():
                 continue  # skips the execution
             
             # Update GPIO pin status based on the event
-            gpio = gpio_devices[pin]
+            gpio = gpio_devices[pin_number]
             gpio.on() if pin_status else gpio.off()
             # print the event details with timestamp
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

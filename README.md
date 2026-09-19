@@ -55,7 +55,7 @@ Open `http://localhost:3000` and connect a wallet on Sepolia. Enter a device ID 
 
 From the project root, copy `.env.example` to `.env` and set `CONTRACT_ADDRESS`, `WSS_URL`, and `GPIOZERO_PIN_FACTORY` if you are not using the defaults.
 
-> **Note:** The listener can run in two modes: `mock` for testing/simulation or leaving blank or `native` for actual hardware. Set the `GPIOZERO_PIN_FACTORY` environment variable accordingly.
+> **Important:** Set the `GPIOZERO_PIN_FACTORY` environment variable to `mock` for testing/simulation, or `native` for actual hardware. or if you're on Raspberry Pi 5, set it to `lgpio`.
 
 Install the Python dependencies and start the listener:
 
