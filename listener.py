@@ -3,7 +3,7 @@ import asyncio
 from datetime import datetime
 from dotenv import load_dotenv
 from web3 import AsyncWeb3, WebSocketProvider
-from RPiSim import GPIO # for simulation
+from RPiSim.GPIO import GPIO # for simulation
 # import RPi.GPIO as GPIO # for real rasp-pi
 
 # Load environment variables

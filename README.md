@@ -73,7 +73,7 @@ The listener uses `GPIOSimulator` by default. For a physical Raspberry Pi, insta
 
 ## Demo
 
-![Screen1](https://github.com/Salmandabbakuti/depin-bnb-hack/assets/29351207/d0900ce0-3b03-411f-97b8-f40d7aa8b627)
+<img width="1334" height="726" alt="bot_demo_screen" src="https://github.com/user-attachments/assets/e985d69d-f69b-421a-a12f-625c0c24a6f7" />
 
 ### End-to-end sequence
 
