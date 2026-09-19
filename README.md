@@ -18,9 +18,7 @@ When the device is loaded, both the web client and the listener read the existin
 
 - [Node.js 22+](https://nodejs.org/en/download/)
 - [Python 3+](https://www.python.org/downloads/)
-- Windows 8+ (for simulating GPIO pins)
-- [Windows Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) - Only for Windows (Simulating GPIO pins on Windows)
-- [Raspberry Pi](https://www.raspberrypi.org/products/raspberry-pi-4-model-b/) (for actual GPIO pins)
+- [Raspberry Pi](https://www.raspberrypi.org/products/raspberry-pi-4-model-b/) (for actual GPIO control, optional)
 
 ### Setup
 
@@ -55,7 +53,9 @@ Open `http://localhost:3000` and connect a wallet on Sepolia. Enter a device ID 
 
 #### 3. Start the event listener
 
-From the project root, copy `.env.example` to `.env` and set `CONTRACT_ADDRESS` and `WSS_URL` if you are not using the defaults.
+From the project root, copy `.env.example` to `.env` and set `CONTRACT_ADDRESS`, `WSS_URL`, and `GPIOZERO_PIN_FACTORY` if you are not using the defaults.
+
+> **Important:** Set the `GPIOZERO_PIN_FACTORY` environment variable to `mock` for testing/simulation, or `native` for actual hardware. or if you're on Raspberry Pi 5, set it to `lgpio`.
 
 Install the Python dependencies and start the listener:
 
@@ -66,8 +66,6 @@ python listener.py
 ```
 
 When prompted, enter the same device ID loaded in the client and the connected wallet owner address. The listener filters events for that exact device and owner.
-
-The listener uses `GPIOSimulator` by default. For a physical Raspberry Pi, install and enable `RPi.GPIO` in place of the simulator import, then run the same listener command.
 
 ![listener_prompt](https://github.com/Salmandabbakuti/depin-bnb-hack/assets/29351207/d67ab995-0ceb-4c37-9a76-db3d6473bce3)
 
@@ -104,8 +102,7 @@ sequenceDiagram
 - [Hardhat](https://hardhat.org/) - Ethereum development environment for compiling, testing, deploying, and interacting with smart contracts
 - [Solidity](https://docs.soliditylang.org/en/v0.8.24/) - Ethereum's smart contract programming language
 - [Web3.py](https://web3py.readthedocs.io/en/stable/) - Python library for interacting with Ethereum blockchain
-- [GPIO Simulator](https://pypi.org/project/GPIOSimulator/) - Python library for simulating GPIO pins
-- [RPi.GPIO](https://pypi.org/project/RPi.GPIO/) - Python library for accessing GPIO pins on Raspberry Pi
+- [gpiozero](https://gpiozero.readthedocs.io/en/stable/) - A simple interface to GPIO devices with Raspberry Pi
 - [React + Vite](https://vitejs.dev/) - Frontend development environment for building fast and modern web apps
 
 ## Safety
