@@ -39,6 +39,8 @@ npx hardhat ignition deploy ignition/modules/DeviceRegistry.ts --network sepolia
 
 Copy `client/.env.example` to `client/.env` and set the AppKit client ID.
 
+Update `CONTRACT_ADDRESS` variable in `client/utils/index.js` if you want your own deployed contract address instead of the default one.
+
 Install the client dependencies and start the Vite server:
 
 ```bash

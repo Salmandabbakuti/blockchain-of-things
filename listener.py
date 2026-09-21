@@ -3,7 +3,7 @@ import asyncio
 from datetime import datetime
 from dotenv import load_dotenv
 from web3 import AsyncWeb3, WebSocketProvider
-from web3.exceptions import Web3Exception  # Import targeted exceptions
+from web3.exceptions import Web3Exception
 from gpiozero import DigitalOutputDevice
 
 # Load environment variables
@@ -90,7 +90,7 @@ async def main():
             log = response["result"]
             # decode pin and status from logs, decode device_id, owner if needed for validation
             pin_number = int.from_bytes(
-                log["topics"],
+                log["topics"][2],
                 "big",
             )
 
