@@ -16,8 +16,8 @@ When the device is loaded, both the web client and the listener read the existin
 
 ### Prerequisites
 
-- [Node.js 22+](https://nodejs.org/en/download/)
-- [Python 3+](https://www.python.org/downloads/)
+- [Node.js 24+](https://nodejs.org/en/download/)
+- [Python 3.14+](https://www.python.org/downloads/)
 - [Raspberry Pi](https://www.raspberrypi.org/products/raspberry-pi-4-model-b/) (for actual GPIO control, optional)
 
 ### Setup

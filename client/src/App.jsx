@@ -19,10 +19,15 @@ import {
   Tooltip
 } from "antd";
 import { LoginOutlined, ReloadOutlined } from "@ant-design/icons";
-import { supportedPins, contract } from "./utils";
+import {
+  supportedPins,
+  contract,
+  CONTRACT_ADDRESS,
+  EXPLORER_URL
+} from "./utils";
 import "./App.css";
 
-function App() {
+export default function App() {
   const [loading, setLoading] = useState({});
   const [pinStates, setPinStates] = useState({});
   const [deviceId, setDeviceId] = useState(null);
@@ -54,9 +59,20 @@ function App() {
       )
     },
     {
-      key: "network",
-      label: "Network",
-      children: <Tag color="blue">Sepolia</Tag>
+      key: "contract",
+      label: "Contract",
+      children: (
+        <Space size="small">
+          <a
+            href={`${EXPLORER_URL}/address/${CONTRACT_ADDRESS}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {CONTRACT_ADDRESS.slice(0, 6)}...{CONTRACT_ADDRESS.slice(-6)}
+          </a>
+          <Tag color="blue">Sepolia</Tag>
+        </Space>
+      )
     }
   ];
 
@@ -399,5 +415,3 @@ function App() {
     </div>
   );
 }
-
-export default App;
