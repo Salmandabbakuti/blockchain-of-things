@@ -55,7 +55,7 @@ export default function SiteLayout({ children }) {
             color: "#999"
           }}
         >
-          v1.1.0
+          v1.1.1
         </p>
       </Footer>
     </Layout>
