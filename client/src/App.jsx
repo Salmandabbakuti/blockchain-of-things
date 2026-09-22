@@ -148,8 +148,9 @@ export default function App() {
       return message.error("Please connect your wallet");
     if (selectedChainId !== "11155111")
       return message.error("Please switch to sepolia network");
+
+    setLoading((prev) => ({ ...prev, [pin]: true }));
     try {
-      setLoading({ [pin]: true });
       message.info("Sending pin status change transaction...");
       // +status converts boolean to number (0 or 1) since contract accepts (0 or 1) as status
       const ethersProvider = new BrowserProvider(walletProvider);
@@ -162,15 +163,15 @@ export default function App() {
       );
       await tx.wait();
       message.success(`Pin ${pin} is now turned ${status ? "on" : "off"}`);
-      setPinStates({ ...pinStates, [pin]: status });
+      setPinStates((prev) => ({ ...prev, [pin]: status }));
     } catch (err) {
       console.log("err setting pin status", err);
       message.error(
         `Failed to set pin ${pin} status: ${err?.reason || err?.message || "Unknown error"}`
       );
-      setPinStates({ ...pinStates, [pin]: !status });
+      setPinStates((prev) => ({ ...prev, [pin]: !status }));
     } finally {
-      setLoading({ [pin]: false });
+      setLoading((prev) => ({ ...prev, [pin]: false }));
     }
   };
 
@@ -180,9 +181,9 @@ export default function App() {
       return message.error("Please connect your wallet");
     if (selectedChainId !== "11155111")
       return message.error("Please switch to sepolia network");
+    setLoading((prev) => ({ ...prev, reset: true }));
+
     try {
-      setLoading({ reset: true });
-      // TODO: Enable this transaction when on-chain reset is ready.
       const ethersProvider = new BrowserProvider(walletProvider);
       const signer = await ethersProvider.getSigner();
       const tx = await contract.connect(signer).resetDeviceBitmap(deviceId);
@@ -195,7 +196,7 @@ export default function App() {
         `Failed to reset pins: ${err?.reason || err?.message || "Unknown error"}`
       );
     } finally {
-      setLoading({ reset: false });
+      setLoading((prev) => ({ ...prev, reset: false }));
     }
   };
 
