@@ -27,6 +27,7 @@ import {
 } from "./utils";
 import "./App.css";
 
+/** Render the wallet-connected dashboard for managing a device's GPIO pins. */
 export default function App() {
   const [loading, setLoading] = useState({});
   const [pinStates, setPinStates] = useState({});
