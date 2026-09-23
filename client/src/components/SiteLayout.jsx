@@ -3,7 +3,6 @@ import "antd/dist/reset.css";
 
 const { Header, Footer, Content } = Layout;
 
-/** Render the shared page shell around the supplied application content. */
 export default function SiteLayout({ children }) {
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -56,7 +55,7 @@ export default function SiteLayout({ children }) {
             color: "#999"
           }}
         >
-          v1.1.2
+          v1.1.3
         </p>
       </Footer>
     </Layout>

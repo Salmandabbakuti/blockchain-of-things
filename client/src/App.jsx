@@ -27,7 +27,6 @@ import {
 } from "./utils";
 import "./App.css";
 
-/** Render the wallet-connected dashboard for managing a device's GPIO pins. */
 export default function App() {
   const [loading, setLoading] = useState({});
   const [pinStates, setPinStates] = useState({});
@@ -122,9 +121,8 @@ export default function App() {
     try {
       setLoading({ device: true });
       const provider = new BrowserProvider(walletProvider);
-      const signer = await provider.getSigner();
       const bitmap = await contract
-        .connect(signer)
+        .connect(provider)
         .deviceBitmaps(account, deviceIdInput);
       const nextPinStates = {};
       for (const pin of supportedPins) {
@@ -395,7 +393,6 @@ export default function App() {
             </p>
             <div className="hero-cta">
               <Space>
-                <appkit-button />
                 <Button
                   type="link"
                   size="large"
@@ -404,6 +401,7 @@ export default function App() {
                 >
                   Learn More
                 </Button>
+                <appkit-button />
               </Space>
             </div>
             <div className="workflow" aria-label="How it works">
