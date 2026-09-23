@@ -1,6 +1,6 @@
 import { Contract } from "ethers";
 
-export const CONTRACT_ADDRESS = "0xbDe07ed4Da072DcBDb4348667cd74d155712dDAe";
+export const CONTRACT_ADDRESS = "0xe31AC9A3B5fe30EA1284c20F4b09feF6a685Aea8";
 export const EXPLORER_URL = "https://sepolia.etherscan.io";
 
 const CONTRACT_ABI = [
