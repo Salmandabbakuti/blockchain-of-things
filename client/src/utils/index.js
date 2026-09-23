@@ -1,7 +1,7 @@
 import { Contract } from "ethers";
 
-export const CONTRACT_ADDRESS = "0xbDe07ed4Da072DcBDb4348667cd74d155712dDAe";
-export const EXPLORER_URL = "https://sepolia.etherscan.io";
+export const CONTRACT_ADDRESS = "0x63F72c1F001ff6B5A88B4a8a5ad788A63091FCc3";
+export const EXPLORER_URL = "https://sepolia.arbiscan.io";
 
 const CONTRACT_ABI = [
   "function setDevicePinStatus(uint256 _deviceId, uint8 _pin, uint8 _pinStatus)",

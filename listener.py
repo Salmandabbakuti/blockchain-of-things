@@ -10,9 +10,9 @@ from gpiozero import DigitalOutputDevice
 # includes pin factory setting for gpiozero (mock/simulation or native)
 load_dotenv()
 
-WSS_URL = os.getenv("WSS_URL", "wss://ethereum-sepolia-rpc.publicnode.com")
+WSS_URL = os.getenv("WSS_URL", "wss://arbitrum-sepolia-rpc.publicnode.com")
 CONTRACT_ADDRESS = os.getenv(
-    "CONTRACT_ADDRESS", "0xbDe07ed4Da072DcBDb4348667cd74d155712dDAe"
+    "CONTRACT_ADDRESS", "0x63F72c1F001ff6B5A88B4a8a5ad788A63091FCc3"
 )
 
 PIN_LIST = [

@@ -70,7 +70,7 @@ export default function App() {
           >
             {CONTRACT_ADDRESS.slice(0, 6)}...{CONTRACT_ADDRESS.slice(-6)}
           </a>
-          <Tag color="blue">Sepolia</Tag>
+          <Tag color="blue">Arbitrum Sepolia</Tag>
         </Space>
       )
     }
@@ -114,8 +114,8 @@ export default function App() {
       return message.error("Enter a valid device ID");
     }
     if (!walletProvider) return message.error("Please connect your wallet");
-    if (selectedChainId !== "11155111") {
-      return message.error("Please switch to the Sepolia network");
+    if (selectedChainId !== "421614") {
+      return message.error("Please switch to the Arbitrum Sepolia network");
     }
 
     try {
@@ -145,8 +145,8 @@ export default function App() {
   const handleSetPinStatus = async (pin, status) => {
     if (!account || !walletProvider)
       return message.error("Please connect your wallet");
-    if (selectedChainId !== "11155111")
-      return message.error("Please switch to sepolia network");
+    if (selectedChainId !== "421614")
+      return message.error("Please switch to Arbitrum Sepolia network");
 
     setLoading((prev) => ({ ...prev, [pin]: true }));
     try {
@@ -178,8 +178,8 @@ export default function App() {
     if (deviceId === null) return message.error("Load a device first");
     if (!account || !walletProvider)
       return message.error("Please connect your wallet");
-    if (selectedChainId !== "11155111")
-      return message.error("Please switch to sepolia network");
+    if (selectedChainId !== "421614")
+      return message.error("Please switch to Arbitrum Sepolia network");
     setLoading((prev) => ({ ...prev, reset: true }));
 
     try {

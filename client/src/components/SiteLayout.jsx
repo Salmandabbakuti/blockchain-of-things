@@ -45,7 +45,8 @@ export default function SiteLayout({ children }) {
             target="_blank"
             rel="noopener noreferrer"
           >
-            ©{new Date().getFullYear()} Blockchain of Things
+            ©{new Date().getFullYear()} Blockchain of Things. Powered by
+            Arbitrum
           </a>
         </div>
         <p
@@ -55,7 +56,7 @@ export default function SiteLayout({ children }) {
             color: "#999"
           }}
         >
-          v1.1.3
+          v1.2.0
         </p>
       </Footer>
     </Layout>

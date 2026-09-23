@@ -26,13 +26,13 @@ When the device is loaded, both the web client and the listener read the existin
 
 Copy `.env.example` to `.env` for the listener configuration. The Hardhat deployment account is configured through the Hardhat keystore.
 
-Install the root dependencies, compile the contract, store a dedicated test account's private key, and deploy to Sepolia:
+Install the root dependencies, compile the contract, store a dedicated test account's private key, and deploy to Arbitrum Sepolia:
 
 ```bash
 npm install
 npx hardhat compile
 npx hardhat keystore set PRIVATE_KEY
-npx hardhat ignition deploy ignition/modules/DeviceRegistry.ts --network sepolia
+npx hardhat ignition deploy ignition/modules/DeviceRegistry.ts --network arbitrumSepolia
 ```
 
 #### 2. Start the client
@@ -49,7 +49,7 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:3000` and connect a wallet on Sepolia. Enter a device ID and click the arrow button to load its current GPIO bitmap.
+Open `http://localhost:3000` and connect a wallet and switch to Arbitrum Sepolia. Enter a device ID and click the arrow button to load its current GPIO bitmap.
 
 <img width="1383" height="853" alt="usage-screen-client" src="https://github.com/user-attachments/assets/d811ef79-c26b-471b-bb62-828329b34462" />
 
@@ -82,7 +82,7 @@ sequenceDiagram
 	actor User
 	participant UI as React client
 	participant Wallet as Wallet
-	participant Chain as Sepolia / DeviceRegistry
+	participant Chain as Arbitrum Sepolia / DeviceRegistry
 	participant Listener as Python listener
 	participant Pi as Raspberry Pi GPIO
 

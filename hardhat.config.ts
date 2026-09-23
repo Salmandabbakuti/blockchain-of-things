@@ -22,16 +22,14 @@ export default defineConfig({
     }
   },
   networks: {
-    sepolia: {
+    arbitrumSepolia: {
       type: "http",
-      chainType: "l1",
-      url: "https://ethereum-sepolia-rpc.publicnode.com",
+      url: "https://sepolia-rollup.arbitrum.io/rpc",
       accounts
     },
-    polygon: {
+    arbitrum: {
       type: "http",
-      chainType: "l1",
-      url: "https://polygon.drpc.org",
+      url: "https://arb1.arbitrum.io/rpc",
       accounts
     }
   }
