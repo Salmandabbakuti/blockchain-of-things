@@ -3,7 +3,8 @@ import asyncio
 from datetime import datetime
 from dotenv import load_dotenv
 from web3 import AsyncWeb3, WebSocketProvider
-from gpiozero import Device, DigitalOutputDevice
+from web3.exceptions import Web3Exception
+from gpiozero import DigitalOutputDevice
 
 # Load environment variables
 # includes pin factory setting for gpiozero (mock/simulation or native)
@@ -11,18 +12,39 @@ load_dotenv()
 
 WSS_URL = os.getenv("WSS_URL", "wss://ethereum-sepolia-rpc.publicnode.com")
 CONTRACT_ADDRESS = os.getenv(
-    "CONTRACT_ADDRESS", "0xbDe07ed4Da072DcBDb4348667cd74d155712dDAe"
+    "CONTRACT_ADDRESS", "0x7F46dD5eB0b48805053738541693EBC5473669d2"
 )
 
 PIN_LIST = [
-    2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
-    15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
 ]
 
-gpio_devices = {
-    pin: DigitalOutputDevice(pin)
-    for pin in PIN_LIST
-}
+gpio_devices = {pin: DigitalOutputDevice(pin) for pin in PIN_LIST}
 
 
 async def main():
@@ -33,24 +55,19 @@ async def main():
     owner_address = input("Enter the owner address: ")
     owner_address_ellipsized = f"{owner_address[:6]}...{owner_address[-4:]}"
 
-    w3 = AsyncWeb3(WebSocketProvider(WSS_URL))
-
-    try:
-        await w3.provider.connect()
+    # Use async with context manager to safely open and auto-close the socket
+    async with AsyncWeb3(WebSocketProvider(WSS_URL)) as w3:
         print("Connected to WebSocket provider.")
-        
+
         # Read current bitmap for the device and owner
         selector = w3.keccak(text="deviceBitmaps(address,uint256)")[:4]
         owner_bytes = bytes.fromhex(owner_address[2:].zfill(64))
         device_id_bytes = device_id.to_bytes(32, "big")
         contract_address_checksum = w3.to_checksum_address(CONTRACT_ADDRESS)
 
-        calldata = (selector + owner_bytes + device_id_bytes)
+        calldata = selector + owner_bytes + device_id_bytes
 
-        result = await w3.eth.call({
-            "to": contract_address_checksum,
-            "data": calldata
-        })
+        result = await w3.eth.call({"to": contract_address_checksum, "data": calldata})
 
         current_bitmap = int.from_bytes(result, "big")
 
@@ -64,20 +81,16 @@ async def main():
                 f"GPIO {pin} → "
                 f"{'🟢 ON' if gpio.value else '⚫️ OFF'}"
             )
-            
 
-        event_topic = w3.keccak(text="DevicePinStatusChanged(uint256,uint8,uint8,address)")
+        event_topic = w3.keccak(
+            text="DevicePinStatusChanged(uint256,uint8,uint8,address)"
+        )
 
-        subscription_id = await w3.eth.subscribe(
+        await w3.eth.subscribe(
             "logs",
             {
                 "address": contract_address_checksum,
-                "topics": [
-                    event_topic,
-                    device_id_bytes,
-                    None,  # any pin
-                    owner_bytes
-                ],
+                "topics": [event_topic, device_id_bytes, None, owner_bytes],  # any pin
             },
         )
 
@@ -104,7 +117,7 @@ async def main():
             if pin_number not in PIN_LIST:
                 print(f"Pin {pin_number} is not in the GPIO Setup. Skipping...")
                 continue  # skips the execution
-            
+
             # Update GPIO pin status based on the event
             gpio = gpio_devices[pin_number]
             gpio.on() if pin_status else gpio.off()
@@ -116,12 +129,6 @@ async def main():
                 f"GPIO {pin_number} → "
                 f"{'🟢 ON' if gpio.value else '⚫️ OFF'}"
             )
-    
-    except Exception as e:
-        print("An error occurred:", e)
-
-    finally:
-        await w3.provider.disconnect()
 
 
 if __name__ == "__main__":
@@ -129,3 +136,7 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         print("Stopping...")
+    except Web3Exception as w3e:
+        print("web3 exception occurred:", w3e)
+    except Exception as e:
+        print("An unexpected error occurred:", e)

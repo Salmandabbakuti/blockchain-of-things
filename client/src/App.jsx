@@ -19,10 +19,15 @@ import {
   Tooltip
 } from "antd";
 import { LoginOutlined, ReloadOutlined } from "@ant-design/icons";
-import { supportedPins, contract } from "./utils";
+import {
+  supportedPins,
+  contract,
+  CONTRACT_ADDRESS,
+  EXPLORER_URL
+} from "./utils";
 import "./App.css";
 
-function App() {
+export default function App() {
   const [loading, setLoading] = useState({});
   const [pinStates, setPinStates] = useState({});
   const [deviceId, setDeviceId] = useState(null);
@@ -54,9 +59,20 @@ function App() {
       )
     },
     {
-      key: "network",
-      label: "Network",
-      children: <Tag color="blue">Sepolia</Tag>
+      key: "contract",
+      label: "Contract",
+      children: (
+        <Space size="small">
+          <a
+            href={`${EXPLORER_URL}/address/${CONTRACT_ADDRESS}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {CONTRACT_ADDRESS.slice(0, 6)}...{CONTRACT_ADDRESS.slice(-6)}
+          </a>
+          <Tag color="blue">Sepolia</Tag>
+        </Space>
+      )
     }
   ];
 
@@ -82,7 +98,7 @@ function App() {
       )
     },
     {
-      key: "off",
+      key: "inactive",
       children: (
         <Statistic
           title="Inactive"
@@ -105,14 +121,13 @@ function App() {
     try {
       setLoading({ device: true });
       const provider = new BrowserProvider(walletProvider);
-      const signer = await provider.getSigner();
-      const bitmap = await contract
-        .connect(signer)
+      const deviceBitmap = await contract
+        .connect(provider)
         .deviceBitmaps(account, deviceIdInput);
       const nextPinStates = {};
       for (const pin of supportedPins) {
-        // We use Number(bitmap) if bitmap is a BigInt, or safely bit-shift if it fits
-        nextPinStates[pin] = Boolean((bitmap >> BigInt(pin)) & 1n);
+        // using BigInt to handle js safe integer limit since deviceBitmap is a uint256
+        nextPinStates[pin] = ((deviceBitmap >> BigInt(pin)) & 1n) === 1n;
       }
       setDeviceId(deviceIdInput);
       setPinStates(nextPinStates);
@@ -132,8 +147,9 @@ function App() {
       return message.error("Please connect your wallet");
     if (selectedChainId !== "11155111")
       return message.error("Please switch to sepolia network");
+
+    setLoading((prev) => ({ ...prev, [pin]: true }));
     try {
-      setLoading({ [pin]: true });
       message.info("Sending pin status change transaction...");
       // +status converts boolean to number (0 or 1) since contract accepts (0 or 1) as status
       const ethersProvider = new BrowserProvider(walletProvider);
@@ -146,15 +162,15 @@ function App() {
       );
       await tx.wait();
       message.success(`Pin ${pin} is now turned ${status ? "on" : "off"}`);
-      setPinStates({ ...pinStates, [pin]: status });
+      setPinStates((prev) => ({ ...prev, [pin]: status }));
     } catch (err) {
       console.log("err setting pin status", err);
       message.error(
         `Failed to set pin ${pin} status: ${err?.reason || err?.message || "Unknown error"}`
       );
-      setPinStates({ ...pinStates, [pin]: !status });
+      setPinStates((prev) => ({ ...prev, [pin]: !status }));
     } finally {
-      setLoading({ [pin]: false });
+      setLoading((prev) => ({ ...prev, [pin]: false }));
     }
   };
 
@@ -164,9 +180,9 @@ function App() {
       return message.error("Please connect your wallet");
     if (selectedChainId !== "11155111")
       return message.error("Please switch to sepolia network");
+    setLoading((prev) => ({ ...prev, reset: true }));
+
     try {
-      setLoading({ reset: true });
-      // TODO: Enable this transaction when on-chain reset is ready.
       const ethersProvider = new BrowserProvider(walletProvider);
       const signer = await ethersProvider.getSigner();
       const tx = await contract.connect(signer).resetDeviceBitmap(deviceId);
@@ -179,7 +195,7 @@ function App() {
         `Failed to reset pins: ${err?.reason || err?.message || "Unknown error"}`
       );
     } finally {
-      setLoading({ reset: false });
+      setLoading((prev) => ({ ...prev, reset: false }));
     }
   };
 
@@ -377,7 +393,6 @@ function App() {
             </p>
             <div className="hero-cta">
               <Space>
-                <appkit-button />
                 <Button
                   type="link"
                   size="large"
@@ -386,6 +401,7 @@ function App() {
                 >
                   Learn More
                 </Button>
+                <appkit-button />
               </Space>
             </div>
             <div className="workflow" aria-label="How it works">
@@ -399,5 +415,3 @@ function App() {
     </div>
   );
 }
-
-export default App;

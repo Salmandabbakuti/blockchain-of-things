@@ -17,7 +17,7 @@ When the device is loaded, both the web client and the listener read the existin
 ### Prerequisites
 
 - [Node.js 22+](https://nodejs.org/en/download/)
-- [Python 3+](https://www.python.org/downloads/)
+- [Python 3.10+](https://www.python.org/downloads/)
 - [Raspberry Pi](https://www.raspberrypi.org/products/raspberry-pi-4-model-b/) (for actual GPIO control, optional)
 
 ### Setup
@@ -37,7 +37,7 @@ npx hardhat ignition deploy ignition/modules/DeviceRegistry.ts --network sepolia
 
 #### 2. Start the client
 
-Copy `client/.env.example` to `client/.env` and set the AppKit client ID.
+Copy `client/.env.example` to `client/.env` and set `VITE_THIRDWE_CLIENT_ID` and `VITE_CONTRACT_ADDRESS` if you are not using the defaults.
 
 Install the client dependencies and start the Vite server:
 
