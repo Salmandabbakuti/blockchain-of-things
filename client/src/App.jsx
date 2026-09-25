@@ -98,7 +98,7 @@ export default function App() {
       )
     },
     {
-      key: "off",
+      key: "inactive",
       children: (
         <Statistic
           title="Inactive"
@@ -121,13 +121,13 @@ export default function App() {
     try {
       setLoading({ device: true });
       const provider = new BrowserProvider(walletProvider);
-      const bitmap = await contract
+      const deviceBitmapRes = await contract
         .connect(provider)
         .deviceBitmaps(account, deviceIdInput);
+      const deviceBitmap = Number(deviceBitmapRes); // Convert BigInt to Number for faster bitwise operations
       const nextPinStates = {};
       for (const pin of supportedPins) {
-        // We use Number(bitmap) if bitmap is a BigInt, or safely bit-shift if it fits
-        nextPinStates[pin] = Boolean((bitmap >> BigInt(pin)) & 1n);
+        nextPinStates[pin] = ((deviceBitmap >> pin) & 1) === 1;
       }
       setDeviceId(deviceIdInput);
       setPinStates(nextPinStates);
