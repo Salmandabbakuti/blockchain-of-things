@@ -121,13 +121,13 @@ export default function App() {
     try {
       setLoading({ device: true });
       const provider = new BrowserProvider(walletProvider);
-      const deviceBitmapRes = await contract
+      const deviceBitmap = await contract
         .connect(provider)
         .deviceBitmaps(account, deviceIdInput);
-      const deviceBitmap = Number(deviceBitmapRes); // Convert BigInt to Number for faster bitwise operations
       const nextPinStates = {};
       for (const pin of supportedPins) {
-        nextPinStates[pin] = ((deviceBitmap >> pin) & 1) === 1;
+        // using BigInt to handle js safe integer limit since deviceBitmap is a uint256
+        nextPinStates[pin] = ((deviceBitmap >> BigInt(pin)) & 1n) === 1n;
       }
       setDeviceId(deviceIdInput);
       setPinStates(nextPinStates);
