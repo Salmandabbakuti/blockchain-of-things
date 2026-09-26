@@ -12,7 +12,7 @@ load_dotenv()
 
 WSS_URL = os.getenv("WSS_URL", "wss://ethereum-sepolia-rpc.publicnode.com")
 CONTRACT_ADDRESS = os.getenv(
-    "CONTRACT_ADDRESS", "0x7F46dD5eB0b48805053738541693EBC5473669d2"
+    "CONTRACT_ADDRESS", "0x316951585c036c0e410ed33add0ffab314801248"
 )
 
 PIN_LIST = [

@@ -23,7 +23,7 @@ contract DeviceRegistry {
     /**
      * @notice Updates the on/off status of a specific pin.
      * @param _deviceId The unique ID of the device.
-     * @param _pin The GPIO pin number (0 to 27).
+     * @param _pin The GPIO pin number (2 to 27).
      * @param _pinStatus The target status (0 = Off, 1 = On).
      */
     function setDevicePinStatus(
@@ -31,8 +31,8 @@ contract DeviceRegistry {
         uint8 _pin,
         PinStatus _pinStatus
     ) external {
-        // validate pin number range (0-27)
-        require(_pin <= 27, "Pin out of range!");
+        // validate pin number range (2-27)
+        require(_pin >= 2 && _pin <= 27, "Invalid pin");
 
         // load the current bitmap for the device
         uint256 currentBitmap = deviceBitmaps[msg.sender][_deviceId];
