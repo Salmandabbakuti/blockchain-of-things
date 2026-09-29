@@ -2,7 +2,7 @@ import os
 import asyncio
 from datetime import datetime
 from dotenv import load_dotenv
-from web3 import AsyncWeb3, WebSocketProvider
+from web3 import Web3, AsyncWeb3, WebSocketProvider
 from web3.exceptions import Web3Exception
 from gpiozero import DigitalOutputDevice
 
@@ -52,7 +52,7 @@ async def main():
 
     # Get filters before opening the WebSocket connection
     device_id = int(input("Enter the device id: "))
-    owner_address = input("Enter the owner address: ")
+    owner_address = Web3.to_checksum_address(input("Enter the owner address: ").strip())
     owner_address_ellipsized = f"{owner_address[:6]}...{owner_address[-4:]}"
 
     # Use async with context manager to safely open and auto-close the socket
