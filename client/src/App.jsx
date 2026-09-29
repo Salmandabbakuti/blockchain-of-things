@@ -31,7 +31,6 @@ export default function App() {
   const [loading, setLoading] = useState({});
   const [pinStates, setPinStates] = useState({});
   const [deviceId, setDeviceId] = useState(null);
-  const [deviceIdInput, setDeviceIdInput] = useState("");
 
   const { address: account, caipAddress } = useAppKitAccount();
   const selectedChainId = caipAddress?.split(":")?.[1];
@@ -109,7 +108,7 @@ export default function App() {
     }
   ];
 
-  const loadDevice = async () => {
+  const loadDevice = async (deviceIdInput) => {
     if (deviceIdInput === "" || isNaN(deviceIdInput) || deviceIdInput < 0) {
       return message.error("Enter a valid device ID");
     }
@@ -127,7 +126,7 @@ export default function App() {
       const nextPinStates = {};
       for (const pin of supportedPins) {
         // using BigInt to handle js safe integer limit since deviceBitmap is a uint256
-        nextPinStates[pin] = ((deviceBitmap >> BigInt(pin)) & 1n) === 1n;
+        nextPinStates[pin] = Number((deviceBitmap >> BigInt(pin)) & 1n);
       }
       setDeviceId(deviceIdInput);
       setPinStates(nextPinStates);
@@ -151,12 +150,11 @@ export default function App() {
     setLoading((prev) => ({ ...prev, [pin]: true }));
     try {
       message.info("Sending pin status change transaction...");
-      // +status converts boolean to number (0 or 1) since contract accepts (0 or 1) as status
       const ethersProvider = new BrowserProvider(walletProvider);
       const signer = await ethersProvider.getSigner();
       const tx = await contract
         .connect(signer)
-        .setDevicePinStatus(deviceId, pin, +status);
+        .setDevicePinStatus(deviceId, pin, status);
       message.info(
         "Pin status change transaction sent. Waiting for confirmation..."
       );
@@ -168,7 +166,6 @@ export default function App() {
       message.error(
         `Failed to set pin ${pin} status: ${err?.reason || err?.message || "Unknown error"}`
       );
-      setPinStates((prev) => ({ ...prev, [pin]: !status }));
     } finally {
       setLoading((prev) => ({ ...prev, [pin]: false }));
     }
@@ -215,27 +212,18 @@ export default function App() {
               </div>
               <div className="device-loader">
                 <label htmlFor="device-id">Device ID</label>
-                <Space.Compact>
-                  <Input
-                    id="device-id"
-                    size="large"
-                    inputMode="numeric"
-                    type="number"
-                    min="0"
-                    placeholder="e.g. 7"
-                    value={deviceIdInput}
-                    onChange={(e) => setDeviceIdInput(e.target.value)}
-                    onPressEnter={loadDevice}
-                  />
-                  <Button
-                    type="primary"
-                    size="large"
-                    title="Load device"
-                    icon={<LoginOutlined />}
-                    loading={loading.device}
-                    onClick={loadDevice}
-                  />
-                </Space.Compact>
+                <Input.Search
+                  id="device-id"
+                  size="large"
+                  inputMode="numeric"
+                  type="number"
+                  min="0"
+                  placeholder="e.g. 7"
+                  loading={loading.device}
+                  searchIcon={<LoginOutlined />}
+                  enterButton
+                  onSearch={loadDevice}
+                />
               </div>
             </section>
             {deviceId !== null ? (
@@ -340,8 +328,9 @@ export default function App() {
                           <Switch
                             loading={Boolean(loading[pin])}
                             checked={Boolean(pinStates[pin])}
-                            onChange={(checked) =>
-                              handleSetPinStatus(pin, checked)
+                            onChange={
+                              (checked) =>
+                                handleSetPinStatus(pin, Number(checked)) // Convert boolean to number (0 or 1)
                             }
                           />
 

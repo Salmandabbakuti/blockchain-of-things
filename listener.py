@@ -15,36 +15,8 @@ CONTRACT_ADDRESS = os.getenv(
     "CONTRACT_ADDRESS", "0x973702bfe1Ee5f7Fff560Ad409527D3Bf7Bb5865"
 )
 
-PIN_LIST = [
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    10,
-    11,
-    12,
-    13,
-    14,
-    15,
-    16,
-    17,
-    18,
-    19,
-    20,
-    21,
-    22,
-    23,
-    24,
-    25,
-    26,
-    27,
-]
-
-gpio_devices = {pin: DigitalOutputDevice(pin) for pin in PIN_LIST}
+# Initialize GPIO pins for Raspberry Pi(2-27) (BCM numbering)
+gpio_devices = {pin: DigitalOutputDevice(pin) for pin in range(2, 28)}
 
 
 async def main():
@@ -71,15 +43,16 @@ async def main():
 
         current_bitmap = int.from_bytes(result, "big")
 
-        for pin in PIN_LIST:
+        for pin, gpio_device in gpio_devices.items():
             pin_status = (current_bitmap >> pin) & 1
-            # Update GPIO pin status based on the current bitmap
-            gpio = gpio_devices[pin]
-            gpio.on() if pin_status else gpio.off()
+            
+            # Assign the pin status to the GPIO device(1 for ON, 0 for OFF)
+            gpio_device.value = pin_status
+            
             print(
                 f"[{owner_address_ellipsized}][{device_id}] "
                 f"GPIO {pin} → "
-                f"{'🟢 ON' if gpio.value else '⚫️ OFF'}"
+                f"{'🟢 ON' if gpio_device.value else '⚫️ OFF'}"
             )
 
         event_topic = w3.keccak(
@@ -108,7 +81,7 @@ async def main():
                 "big",
             )
 
-            if pin_number not in PIN_LIST:
+            if pin_number not in gpio_devices:
                 print(f"Pin {pin_number} is not in the GPIO Setup. Skipping...")
                 continue  # skips the execution
 
@@ -117,16 +90,18 @@ async def main():
                 log["data"],
                 "big",
             )
-            # Update GPIO pin status based on the event
-            gpio = gpio_devices[pin_number]
-            gpio.on() if pin_status else gpio.off()
+
+            # Assign the pin status to the GPIO device(1 for ON, 0 for OFF)
+            gpio_device = gpio_devices[pin_number]
+            gpio_device.value = pin_status
+            
             # print the event details with timestamp
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             print(
                 f"[{timestamp}]: "
                 f"[{owner_address_ellipsized}][{device_id}] "
                 f"GPIO {pin_number} → "
-                f"{'🟢 ON' if gpio.value else '⚫️ OFF'}"
+                f"{'🟢 ON' if gpio_device.value else '⚫️ OFF'}"
             )
 
 
