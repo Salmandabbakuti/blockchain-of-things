@@ -7,7 +7,7 @@ contract DeviceRegistry {
         On
     }
 
-    // Each unique Device ID consumes exactly one 32-byte storage slot.
+    /// @notice Stores the GPIO pin states for each device as a 256-bit bitmap.
     mapping(address owner => mapping(uint256 deviceId => uint256 bitmap))
         public deviceBitmaps;
 
@@ -21,43 +21,38 @@ contract DeviceRegistry {
     event DeviceBitmapReset(uint256 indexed deviceId, address indexed owner);
 
     /**
-     * @notice Updates the on/off status of a specific pin.
-     * @param _deviceId The unique ID of the device.
-     * @param _pin The GPIO pin number (2 to 27).
-     * @param _pinStatus The target status (0 = Off, 1 = On).
+     * @notice Sets the GPIO pin status of caller's device.
+     * @param _deviceId ID of the device.
+     * @param _pin GPIO pin number (2-27).
+     * @param _pinStatus Target pin status(On or Off).
      */
     function setDevicePinStatus(
         uint256 _deviceId,
         uint8 _pin,
         PinStatus _pinStatus
     ) external {
-        // validate pin number range (2-27)
         require(_pin >= 2 && _pin <= 27, "Invalid pin");
 
-        // load the current bitmap for the device
         uint256 currentBitmap = deviceBitmaps[msg.sender][_deviceId];
 
-        // Update the bit corresponding to the specified pin
         if (_pinStatus == PinStatus.On) {
             currentBitmap |= 1 << _pin;
         } else {
             currentBitmap &= ~(1 << _pin);
         }
 
-        // Store the updated bitmap back to the mapping
         deviceBitmaps[msg.sender][_deviceId] = currentBitmap;
 
         emit DevicePinStatusChanged(_deviceId, _pin, _pinStatus, msg.sender);
     }
 
     /**
-     * @notice Resets the entire 256-bit pin status bitmap for a specific device.
-     * @dev Useful when device needs to be reinitialized.
-     * @param _deviceId The unique ID of the device.
+     * @notice Resets all GPIO pin states of caller's device.
+     * @param _deviceId ID of the device.
      */
-
     function resetDeviceBitmap(uint256 _deviceId) external {
         deviceBitmaps[msg.sender][_deviceId] = 0;
+
         emit DeviceBitmapReset(_deviceId, msg.sender);
     }
 }

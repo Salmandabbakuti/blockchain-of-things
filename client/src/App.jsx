@@ -393,6 +393,7 @@ export default function App() {
             </p>
             <div className="hero-cta">
               <Space>
+                <appkit-button />
                 <Button
                   type="link"
                   size="large"
@@ -401,7 +402,6 @@ export default function App() {
                 >
                   Learn More
                 </Button>
-                <appkit-button />
               </Space>
             </div>
             <div className="workflow" aria-label="How it works">

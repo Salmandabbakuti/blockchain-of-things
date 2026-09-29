@@ -2,7 +2,7 @@ import { Contract } from "ethers";
 
 export const CONTRACT_ADDRESS =
   import.meta.env.VITE_CONTRACT_ADDRESS ||
-  "0x316951585c036c0e410ed33add0ffab314801248";
+  "0x973702bfe1Ee5f7Fff560Ad409527D3Bf7Bb5865";
 export const EXPLORER_URL = "https://sepolia.etherscan.io";
 
 const CONTRACT_ABI = [

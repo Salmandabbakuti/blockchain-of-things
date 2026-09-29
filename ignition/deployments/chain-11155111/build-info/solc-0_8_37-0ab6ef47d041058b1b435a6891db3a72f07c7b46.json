@@ -1,0 +1,48 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_37-0ab6ef47d041058b1b435a6891db3a72f07c7b46",
+  "solcVersion": "0.8.37",
+  "solcLongVersion": "0.8.37+commit.f401782d",
+  "compilerType": "solc",
+  "toolVersions": {
+    "hardhat": "3.18.0"
+  },
+  "userSourceNameMap": {
+    "contracts/DeviceRegistry.sol": "project/contracts/DeviceRegistry.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode.linkReferences",
+            "evm.bytecode.object",
+            "evm.bytecode.opcodes",
+            "evm.bytecode.sourceMap",
+            "evm.deployedBytecode.immutableReferences",
+            "evm.deployedBytecode.linkReferences",
+            "evm.deployedBytecode.object",
+            "evm.deployedBytecode.opcodes",
+            "evm.deployedBytecode.sourceMap",
+            "evm.methodIdentifiers"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/DeviceRegistry.sol": {
+        "content": "// SPDX-License-Identifier: MIT\r\npragma solidity 0.8.37;\r\n\r\ncontract DeviceRegistry {\r\n    enum PinStatus {\r\n        Off,\r\n        On\r\n    }\r\n\r\n    /// @notice Stores the GPIO pin states for each device as a 256-bit bitmap.\r\n    mapping(address owner => mapping(uint256 deviceId => uint256 bitmap))\r\n        public deviceBitmaps;\r\n\r\n    event DevicePinStatusChanged(\r\n        uint256 indexed deviceId,\r\n        uint8 indexed pin,\r\n        PinStatus status,\r\n        address indexed owner\r\n    );\r\n\r\n    event DeviceBitmapReset(uint256 indexed deviceId, address indexed owner);\r\n\r\n    /**\r\n     * @notice Sets the GPIO pin status of caller's device.\r\n     * @param _deviceId ID of the device.\r\n     * @param _pin GPIO pin number (2-27).\r\n     * @param _pinStatus Target pin status(On or Off).\r\n     */\r\n    function setDevicePinStatus(\r\n        uint256 _deviceId,\r\n        uint8 _pin,\r\n        PinStatus _pinStatus\r\n    ) external {\r\n        require(_pin >= 2 && _pin <= 27, \"Invalid pin\");\r\n\r\n        uint256 currentBitmap = deviceBitmaps[msg.sender][_deviceId];\r\n\r\n        if (_pinStatus == PinStatus.On) {\r\n            currentBitmap |= 1 << _pin;\r\n        } else {\r\n            currentBitmap &= ~(1 << _pin);\r\n        }\r\n\r\n        deviceBitmaps[msg.sender][_deviceId] = currentBitmap;\r\n\r\n        emit DevicePinStatusChanged(_deviceId, _pin, _pinStatus, msg.sender);\r\n    }\r\n\r\n    /**\r\n     * @notice Resets all GPIO pin states of caller's device.\r\n     * @param _deviceId ID of the device.\r\n     */\r\n    function resetDeviceBitmap(uint256 _deviceId) external {\r\n        deviceBitmaps[msg.sender][_deviceId] = 0;\r\n\r\n        emit DeviceBitmapReset(_deviceId, msg.sender);\r\n    }\r\n}\r\n"
+      }
+    }
+  }
+}

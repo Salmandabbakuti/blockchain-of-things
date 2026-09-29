@@ -34,5 +34,10 @@ export default defineConfig({
       url: "https://polygon.drpc.org",
       accounts
     }
+  },
+  verify: {
+    etherscan: {
+      apiKey: configVariable("ETHERSCAN_API_KEY")
+    },
   }
 });

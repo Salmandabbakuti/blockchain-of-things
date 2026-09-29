@@ -33,6 +33,10 @@ npm install
 npx hardhat compile
 npx hardhat keystore set PRIVATE_KEY
 npx hardhat ignition deploy ignition/modules/DeviceRegistry.ts --network sepolia
+
+# for contract verification(optional)
+npx hardhat keystore set ETHERSCAN_API_KEY
+npx hardhat verify --network sepolia <DEPLOYED_CONTRACT_ADDRESS>
 ```
 
 #### 2. Start the client

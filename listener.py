@@ -12,7 +12,7 @@ load_dotenv()
 
 WSS_URL = os.getenv("WSS_URL", "wss://ethereum-sepolia-rpc.publicnode.com")
 CONTRACT_ADDRESS = os.getenv(
-    "CONTRACT_ADDRESS", "0x316951585c036c0e410ed33add0ffab314801248"
+    "CONTRACT_ADDRESS", "0x973702bfe1Ee5f7Fff560Ad409527D3Bf7Bb5865"
 )
 
 PIN_LIST = [
@@ -108,16 +108,15 @@ async def main():
                 "big",
             )
 
-            # status is the non-indexed value
-            pin_status = int.from_bytes(
-                log["data"],
-                "big",
-            )
-
             if pin_number not in PIN_LIST:
                 print(f"Pin {pin_number} is not in the GPIO Setup. Skipping...")
                 continue  # skips the execution
 
+            # decode pin status from the non-indexed log data
+            pin_status = int.from_bytes(
+                log["data"],
+                "big",
+            )
             # Update GPIO pin status based on the event
             gpio = gpio_devices[pin_number]
             gpio.on() if pin_status else gpio.off()

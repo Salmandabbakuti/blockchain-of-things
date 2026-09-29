@@ -1,6 +1,6 @@
 {
   "name": "bot-hh",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Minimal hardhat boilerplate for Dapp development",
   "private": true,
   "keywords": [],
@@ -15,10 +15,9 @@
   "devDependencies": {
     "@nomicfoundation/hardhat-ignition": "^3.1.8",
     "@nomicfoundation/hardhat-toolbox-viem": "^5.0.7",
-    "@types/node": "^25.9.6",
-    "forge-std": "github:foundry-rs/forge-std#v1.16.2",
-    "hardhat": "^3.16.0",
+    "@types/node": "^26.6.3",
+    "hardhat": "^3.18.0",
     "typescript": "~7.0.2",
-    "viem": "^2.56.5"
+    "viem": "^2.57.0"
   }
 }

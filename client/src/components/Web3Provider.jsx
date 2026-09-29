@@ -27,7 +27,12 @@ createAppKit({
   metadata,
   projectId,
   themeMode: "light",
+  allWallets: "HIDE",
   features: {
+    swaps: false,
+    onramp: false,
+    send: false,
+    socials: ["google", "github", "apple", "x", "discord"],
     analytics: true // Optional - defaults to your Cloud configuration
   }
 });
